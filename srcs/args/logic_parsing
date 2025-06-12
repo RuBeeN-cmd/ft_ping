@@ -1,0 +1,50 @@
+# Logic for parsing command line arguments in C
+
+si short
+  pour chaque flag
+    si has_arg
+      si i+1 = strlen (-c)
+        prendre arg suivant et trim start avec ' '
+        atoi (parse 1 seul '-' ou '+')
+      sinon
+        prendre reste du flag (e.g. -c2) et trim start avec ' '
+        atoi (parse 1 seul '-' ou '+')
+si long
+  	chercher '='
+	si '=' -> split '='
+	si has_arg
+		si '='
+        	prendre reste du flag (e.g. "--count=     2") et trim start avec ' '
+			atoi (parse 1 seul '-' ou '+')
+		sinon
+        	prendre arg suivant et trim start avec ' '
+			atoi (parse 1 seul '-' ou '+')
+
+
+# Logic for parsing command line arguments in C
+
+
+if startwith '--' // long
+	find '='
+	if need_arg
+		if '=' found
+			arg_value = arg from '='
+		else
+			if next arg exists
+				arg_value = next arg
+			else
+				error arg needed
+	else
+		if '=' found
+			error no arg needed
+else if startwith '-' && strlen > 1 // short
+	foreach char in arg
+		if need_arg
+			if next char exists
+				arg_value = end of string
+			else
+				if next arg exists
+					arg_value = next arg
+				else
+					error arg needed
+		

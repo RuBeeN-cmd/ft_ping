@@ -1,6 +1,18 @@
 {
     "files.associations": {
-        "compare": "c",
-        "stdint.h": "c"
-    }
+		"compare": "c",
+		"stdint.h": "c",
+		"stdio.h": "c",
+		"args.h": "c",
+		"stddef.h": "c",
+		"socket.h": "c",
+		"ip_icmp.h": "c",
+		"ip.h": "c",
+		"packet.h": "c",
+		"array": "c",
+		"string": "c",
+		"string_view": "c",
+		"algorithm": "c",
+		"unistd.h": "c"
+	}
 }
