@@ -26,6 +26,8 @@ LIBFLAGS = $(addprefix -L, $(dir $(LIB))) $(addprefix -l, $(notdir $(subst lib,,
 SRC_DIR = srcs
 OBJ_DIR = objs
 
+DOCKER_COMPOSE = ./rsc/docker-compose.yml
+
 all: $(NAME)
 
 $(NAME): $(LIB) $(OBJ_DIR) $(OBJ)
@@ -53,4 +55,7 @@ fclean: clean
 
 re: fclean all
 
-.PHONY: all clean fclean re
+up:
+	@docker compose -f $(DOCKER_COMPOSE) run --name ft_ping --rm --build ft_ping
+
+.PHONY: all clean fclean re up

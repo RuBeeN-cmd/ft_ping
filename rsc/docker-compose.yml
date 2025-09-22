@@ -1,0 +1,11 @@
+services:
+  ft_ping:
+    build: 
+      context: ..
+      dockerfile: rsc/ft_ping/Dockerfile
+    image: ft_ping
+    volumes:
+      - ..:/ft_ping
+    stdin_open: true
+    tty: true
+    command: /bin/zsh
