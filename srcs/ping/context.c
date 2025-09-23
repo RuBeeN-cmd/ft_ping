@@ -36,11 +36,8 @@ static int	create_recv_socket()
 int	init_context(t_context *c, int argc, char *argv[])
 {
 	int ret = parse_args(argc, argv, &c->opts);
-	if (ret < 0) {
-		ERR("Failed to parse arguments\n");
-		return (1);
-	} else if (ret == 1) {
-		return (1);
+	if (ret) {
+		return (ret);
 	}
 
 	c->send_socket = create_send_socket();

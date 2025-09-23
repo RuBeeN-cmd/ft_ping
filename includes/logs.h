@@ -16,8 +16,6 @@ typedef enum e_log_level {
 #define WARN_PREFIX	YELLOW"[WRN]"RESET
 #define ERR_PREFIX	RED"[ERR]"RESET
 
-
-
 #define LOG(_level_, _format_, ...) do { \
 	if (_level_ >= *get_log_level()) { \
 		const char *_log_prefixs_[] = { DBG_PREFIX, INFO_PREFIX, WARN_PREFIX, ERR_PREFIX }; \

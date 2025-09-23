@@ -24,6 +24,71 @@ int	match_short_opt(t_opt opts[], size_t opts_nb, char arg)
 	return (-1);
 }
 
+static int	parse_long_opt(uint64_t *bitmap, char program_name[], char arg[], char *next_arg[])
+{
+	t_opt	opts[OPTS_NB] = OPTS;
+	size_t	opts_nb = OPTS_NB;
+
+	char	*opt = arg + 2;
+	char	*equal_sign = ft_strchr(opt, '=');
+	char	*opt_value;
+	if (equal_sign)
+	{
+		*equal_sign = 0;
+		opt_value = equal_sign + 1;
+	}
+	int	opt_index = match_long_opt(opts, opts_nb, opt);
+	if (opt_index == -1)
+	{
+		unrecognized_option(program_name, arg);
+		return (1);
+	}
+	if (opts[opt_index].has_arg)
+	{
+		if (!equal_sign)
+		{
+			if (!*next_arg)
+			{
+				long_opt_arg_required(program_name, arg);
+				return (1);
+			}
+			opt_value = *next_arg;
+			*next_arg = NULL;
+			(void) opt_value;
+		}
+	}
+	*bitmap ^= 1 << opt_index;
+	return (0);
+}
+
+static int parse_short_opt(uint64_t *bitmap, char program_name[], char arg, char *next_arg[])
+{
+	t_opt	opts[OPTS_NB] = OPTS;
+	size_t	opts_nb = OPTS_NB;
+
+	int	opt_index = match_short_opt(opts, opts_nb, arg);
+	if (opt_index == -1)
+	{
+		invalid_option(program_name, arg);
+		return (1);
+	}
+	char	*opt_value;
+	if (opts[opt_index].has_arg)
+	{
+		if (!*next_arg)
+		{
+			short_opt_arg_required(program_name, arg);
+			return (1);
+		}
+		opt_value = *next_arg;
+		*next_arg = NULL;
+		printf("%c value: %s\n", arg, opt_value);
+		(void) opt_value;
+	}
+	*bitmap ^= 1 << opt_index;
+	return (0);
+}
+
 int parse_args(int argc, char *argv[], t_opts *parsed_opts)
 {
 	t_opt	opts[OPTS_NB] = OPTS;
@@ -31,93 +96,52 @@ int parse_args(int argc, char *argv[], t_opts *parsed_opts)
 	parsed_opts->bitmap = 0;
 	char	*hosts[1024];
 	size_t	host_nb = 0;
+	int		interrupting_flag = 0;
+
+	char	*program_name = argv[0];
 	for (size_t i = 1; i < (size_t) argc; i++)
 	{
+		if (!argv[i])
+			continue ;
 		if (argv[i][0] == '-' && argv[i][1] == '-')
 		{
-			char	*arg = argv[i] + 2;
-			char	*equal_sign = ft_strchr(arg, '=');
-			char	*arg_value;
-			if (equal_sign)
-			{
-				*equal_sign = 0;
-				arg_value = equal_sign + 1;
-			}
-			int	opt_index = match_long_opt(opts, opts_nb, arg);
-			if (opt_index == -1)
-			{
-				unrecognized_option(argv[0], argv[i]);
+			if (parse_long_opt(&(parsed_opts->bitmap), program_name, argv[i], i + 1 <= (size_t) argc ? argv + i + 1 : NULL)) {
 				return (-1);
 			}
-			if (opts[opt_index].has_arg)
-			{
-				if (!equal_sign)
-				{
-					if (i + 1 >= (size_t) argc)
-					{
-						long_opt_arg_required(argv[0], argv[i]);
-						return (-1);
-					}
-					i++;
-					arg_value = argv[i];
-				}
-				printf("%s value: %s\n", arg, arg_value);
-			}
-			parsed_opts->bitmap ^= 1 << opt_index;
-			if (parsed_opts->bitmap & (1 << HELP_OPT)) {
-				help(opts, opts_nb);
-				return (1);
-			}
-			if (parsed_opts->bitmap & (1 << VERSION_OPT)) {
-				version();
-				return (1);
-			}
+			if ((interrupting_flag = get_first_interrupt_flag(parsed_opts->bitmap)))
+				break;
 		}
 		else if (argv[i][0] == '-' && argv[i][1])
 		{
 			size_t	arg_len = ft_strlen(argv[i]);
 			for (size_t j = 1; j < arg_len; j++)
 			{
-				char arg = argv[i][j];
-				int	opt_index = match_short_opt(opts, opts_nb, arg);
-				if (opt_index == -1)
-				{
-					invalid_option(argv[0], arg);
+				if (parse_short_opt(&(parsed_opts->bitmap), program_name, argv[i][j], (i + 1 <= (size_t) argc ? argv + i + 1 : NULL))) {
 					return (-1);
 				}
-
-				char	*arg_value;
-				if (opts[opt_index].has_arg)
-				{
-					if (i + 1 >= (size_t) argc)
-					{
-						short_opt_arg_required(argv[0], arg);
-						return (-1);
-					}
-					i++;
-					arg_value = argv[i];
-					printf("%c value: %s\n", arg, arg_value);
-				}
-				parsed_opts->bitmap ^= 1 << opt_index;
-				if (parsed_opts->bitmap & (1 << HELP_OPT)) {
-					help(opts, opts_nb);
-					return (1);
-				}
-				if (parsed_opts->bitmap & (1 << VERSION_OPT)) {
-					version();
-					return (1);
-				}
+				if ((interrupting_flag = get_first_interrupt_flag(parsed_opts->bitmap)) >= 0)
+					break;
 			}
-		}
-		else
-		{
-			char *arg = argv[i];
-			hosts[host_nb++] = arg;
+			if (interrupting_flag)
+				break;
+		} else {
+			hosts[host_nb++] = argv[i];
 		}
 	}
+	if (interrupting_flag == USAGE_OPT)
+		usage(opts, opts_nb);
+	if (interrupting_flag == HELP_OPT)
+		help(opts, opts_nb);
+	if (interrupting_flag == VERSION_OPT)
+		version();
+	if (interrupting_flag >= 0)
+		return (1);
+	if (host_nb == 0) {
+		missing_host(program_name);
+		return (-1);
+	}
 	parsed_opts->hosts = malloc((host_nb + 1) * sizeof(char *));
-	if (!parsed_opts->hosts)
-	{
+	if (!parsed_opts->hosts) {
 		fprintf(stderr, "Memory allocation failed\n");
 		return (-1);
 	}

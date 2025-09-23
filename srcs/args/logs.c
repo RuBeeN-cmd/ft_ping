@@ -4,30 +4,36 @@
 
 static void	try_help()
 {
-	fprintf(stderr, "Try '%s --help' or '%s --usage' for more information.\n", PROGRAM_NAME, PROGRAM_NAME);
+	ERR("Try '%s --help' or '%s --usage' for more information.\n", PROGRAM_NAME, PROGRAM_NAME);
 }
 
 void	invalid_option(char *program_name, char opt)
 {
-	fprintf(stderr, "%s: invalid option -- '%c'\n", program_name, opt);
+	ERR("%s: invalid option -- '%c'\n", program_name, opt);
 	try_help();
 }
 
 void	unrecognized_option(char *program_name, char *opt)
 {
-	fprintf(stderr, "%s: unrecognized option '%s'\n", program_name, opt);
+	ERR("%s: unrecognized option '%s'\n", program_name, opt);
 	try_help();
 }
 
 void	long_opt_arg_required(char *program_name, char *opt)
 {
-	fprintf(stderr, "%s: option '%s' requires an argument\n", program_name, opt);
+	ERR("%s: option '%s' requires an argument\n", program_name, opt);
 	try_help();
 }
 
 void	short_opt_arg_required(char *program_name, char opt)
 {
-	fprintf(stderr, "%s: option requires an argument -- '%c'\n", program_name, opt);
+	ERR("%s: option requires an argument -- '%c'\n", program_name, opt);
+	try_help();
+}
+
+void	missing_host(char *program_name)
+{
+	ERR("%s: missing host operand\n", program_name);
 	try_help();
 }
 
@@ -70,4 +76,34 @@ Options marked with (root only) are available only to superuser.\n");
 void	version()
 {
 	printf("%s version %s\n", PROGRAM_NAME, PROGRAM_VERSION);
+}
+
+void	usage(t_opt opts[], size_t opts_nb)
+{
+	char	short_opt[256] = { 0 };
+	char	short_opt_with_val[256] = { 0 };
+	char	long_opt[256] = { 0 };
+	char	*crt_short_opt = short_opt;
+	char	*crt_short_opt_with_val = short_opt_with_val;
+	char	*crt_long_opt = long_opt;
+	crt_short_opt += sprintf(crt_short_opt, " [-");
+	for (size_t i = 0; i < opts_nb; i++)
+	{
+		if (opts[i].short_flag) {
+			if (opts[i].has_arg) {
+				crt_short_opt_with_val += sprintf(crt_short_opt_with_val, " [-%c %s]", opts[i].short_flag, opts[i].arg_name);
+			} else {
+				crt_short_opt += sprintf(crt_short_opt, "%c", opts[i].short_flag);
+			}
+		}
+		if (opts[i].long_flag) {
+			if (opts[i].has_arg) {
+				crt_long_opt += sprintf(crt_long_opt, " [--%s=%s]", opts[i].long_flag, opts[i].arg_name);
+			} else {
+				crt_long_opt += sprintf(crt_long_opt, " [--%s]", opts[i].long_flag);
+			}
+		}
+	}
+	sprintf(crt_short_opt, "]");
+	printf("Usage: %s%s%s%s HOST ...\n", PROGRAM_NAME, short_opt, short_opt_with_val, long_opt);
 }
