@@ -35,9 +35,11 @@ static int	create_recv_socket()
 		
 int	init_context(t_context *c, int argc, char *argv[])
 {
-	DBG("Parsing arguments...\n");
-	if (parse_args(argc, argv, &c->opts)) {
+	int ret = parse_args(argc, argv, &c->opts);
+	if (ret < 0) {
 		ERR("Failed to parse arguments\n");
+		return (1);
+	} else if (ret == 1) {
 		return (1);
 	}
 
@@ -45,7 +47,7 @@ int	init_context(t_context *c, int argc, char *argv[])
 	if (c->send_socket < 0) {
 		free(c->opts.hosts);
 		ERR("Failed to create send socket\n");
-		return (1);
+		return (-1);
 	}
 
 	c->recv_socket = create_recv_socket();
@@ -53,7 +55,7 @@ int	init_context(t_context *c, int argc, char *argv[])
 		free(c->opts.hosts);
 		close(c->send_socket);
 		ERR("Failed to create receive socket\n");
-		return (1);
+		return (-1);
 	}
 	return (0);
 }

@@ -4,8 +4,11 @@ int main(int argc, char *argv[]) {
 	set_log_level(DEBUG);	
 
 	t_context c = {0};
-	if (init_context(&c, argc, argv))
+	int ret = init_context(&c, argc, argv);
+	if (ret < 0)
 		return (1);
+	else if (ret == 1)
+		return (0);
 
 	for (size_t i = 0; c.opts.hosts[i]; i++)
 	{

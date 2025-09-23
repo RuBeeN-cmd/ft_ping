@@ -30,10 +30,10 @@ typedef enum e_log_level {
 				printf("%s " _format_, _log_prefixs_[INFO], ##__VA_ARGS__); \
 				break; \
 			case WARNING: \
-				printf("%s " _format_, _log_prefixs_[WARNING], ##__VA_ARGS__); \
+				fprintf(stderr, "%s " _format_, _log_prefixs_[WARNING], ##__VA_ARGS__); \
 				break; \
 			case ERROR: \
-				printf("%s " _format_, _log_prefixs_[ERROR], ##__VA_ARGS__); \
+				fprintf(stderr, "%s " _format_, _log_prefixs_[ERROR], ##__VA_ARGS__); \
 				break; \
 			default: \
 				break; \
