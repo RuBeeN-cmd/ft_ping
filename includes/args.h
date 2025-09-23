@@ -22,7 +22,7 @@ typedef struct	s_opt
 #define	OPTS { \
 	((t_opt) {'c', "count", "stop after sending NUMBER packets", 1, "NUMBER"}), \
 	((t_opt) {'?', "help", "give this help list", 0, NULL}), \
-	((t_opt) {'V', NULL, "print program version", 0, NULL}), \
+	((t_opt) {'V', "version", "print program version", 0, NULL}), \
 }
 
 typedef struct	s_opts
@@ -41,5 +41,6 @@ void	unrecognized_option(char *program_name, char *opt);
 void	long_opt_arg_required(char *program_name, char *opt);
 void	short_opt_arg_required(char *program_name, char opt);
 void	help(t_opt opts[], size_t opts_nb);
+void	version();
 
 #endif

@@ -66,3 +66,8 @@ Send ICMP ECHO_REQUEST packets to network hosts.\n\n", PROGRAM_NAME);
 for any corresponding short options.\n\n\
 Options marked with (root only) are available only to superuser.\n");
 }
+
+void	version()
+{
+	printf("%s version %s\n", PROGRAM_NAME, PROGRAM_VERSION);
+}

@@ -12,7 +12,9 @@ SRC = main.c \
 		args/flags.c \
 		ping/packet.c \
 		ping/ping.c \
-		logs.c
+		logs/logs.c \
+		ping/context.c
+
 
 OBJ = $(addprefix $(OBJ_DIR)/, $(SRC:.c=.o))
 

@@ -63,17 +63,15 @@ int parse_args(int argc, char *argv[], t_opts *parsed_opts)
 				}
 				printf("%s value: %s\n", arg, arg_value);
 			}
-			if (opt_index == HELP_OPT)
-			{
+			parsed_opts->bitmap ^= 1 << opt_index;
+			if (parsed_opts->bitmap & (1 << HELP_OPT)) {
 				help(opts, opts_nb);
 				return (1);
 			}
-			else if (opt_index == VERSION_OPT)
-			{
-				printf("Version %s\n", PROGRAM_VERSION);
+			if (parsed_opts->bitmap & (1 << VERSION_OPT)) {
+				version();
 				return (1);
 			}
-			parsed_opts->bitmap ^= 1 << opt_index;
 		}
 		else if (argv[i][0] == '-' && argv[i][1])
 		{
@@ -100,21 +98,15 @@ int parse_args(int argc, char *argv[], t_opts *parsed_opts)
 					arg_value = argv[i];
 					printf("%c value: %s\n", arg, arg_value);
 				}
-
-
-
-
-				if (opt_index == HELP_OPT)
-				{
+				parsed_opts->bitmap ^= 1 << opt_index;
+				if (parsed_opts->bitmap & (1 << HELP_OPT)) {
 					help(opts, opts_nb);
 					return (1);
 				}
-				else if (opt_index == VERSION_OPT)
-				{
-					printf("Version %s\n", PROGRAM_VERSION);
+				if (parsed_opts->bitmap & (1 << VERSION_OPT)) {
+					version();
 					return (1);
 				}
-				parsed_opts->bitmap ^= 1 << opt_index;
 			}
 		}
 		else
@@ -131,6 +123,5 @@ int parse_args(int argc, char *argv[], t_opts *parsed_opts)
 	}
 	ft_memcpy(parsed_opts->hosts, hosts, host_nb * sizeof(char *));
 	parsed_opts->hosts[host_nb] = NULL;
-	printf("Bitmap: %lu\n", parsed_opts->bitmap);
 	return (0);
 }

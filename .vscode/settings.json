@@ -13,6 +13,9 @@
 		"string": "c",
 		"string_view": "c",
 		"algorithm": "c",
-		"unistd.h": "c"
+		"unistd.h": "c",
+		"in.h": "c",
+		"ft_ping.h": "c",
+		"stdlib.h": "c"
 	}
 }

@@ -6,6 +6,10 @@ services:
     image: ft_ping
     volumes:
       - ..:/ft_ping
+      - /tmp/.X11-unix:/tmp/.X11-unix
     stdin_open: true
+    privileged: true
     tty: true
     command: /bin/zsh
+    environment:
+      - DISPLAY=${DISPLAY}

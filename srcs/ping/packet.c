@@ -4,6 +4,7 @@
 #include <arpa/inet.h>
 #include <sys/time.h>
 #include <libft.h>
+#include <ft_ping.h>
 
 void	dbg_packet(t_ping_packet *packet)
 {
@@ -40,7 +41,7 @@ uint16_t	calculate_checksum(void *buffer, size_t length)
 	return (htons(~sum));
 }
 
-void	init_ip_header(struct iphdr *ip_header, size_t packet_size, in_addr_t dest_addr)
+int	init_ip_header(struct iphdr *ip_header, size_t packet_size, in_addr_t dest_addr)
 {
 	ip_header->ihl = sizeof(struct iphdr) / 4; 
 	ip_header->version = 4;
@@ -51,14 +52,18 @@ void	init_ip_header(struct iphdr *ip_header, size_t packet_size, in_addr_t dest_
 	ip_header->ttl = 64;
 	ip_header->protocol = IPPROTO_ICMP;
 	ip_header->check = 0;
-	// TODO
-	struct sockaddr_in src_addr;
-	inet_pton(AF_INET, "10.0.2.15", &(src_addr.sin_addr));
-	
-	ip_header->saddr = src_addr.sin_addr.s_addr;
+
+	struct in_addr	src_addr;
+
+	if (get_source_ip(&src_addr)) {
+		return (1);
+	}
+
+	ip_header->saddr = src_addr.s_addr;
 	ip_header->daddr = dest_addr;
 
 	ip_header->check = calculate_checksum(ip_header, sizeof(struct iphdr));
+	return (0);
 }
 
 static int get_ping_id()
@@ -93,11 +98,16 @@ void	init_icmp_data(char *data)
 	}
 }
 
-void	create_packet(struct sockaddr_in dest_addr, t_ping_packet *packet)
+int	create_packet(struct sockaddr_in dest_addr, t_ping_packet *packet)
 {
-	init_ip_header(&packet->ip_header, sizeof(packet->ip_header)\
- + sizeof(packet->icmp_header) + PING_PACKET_DATA_SIZE, dest_addr.sin_addr.s_addr);
+
+	if (init_ip_header(&packet->ip_header, sizeof(packet->ip_header)
+ 		+ sizeof(packet->icmp_header) + PING_PACKET_DATA_SIZE, dest_addr.sin_addr.s_addr))
+	{
+		return (1);
+	}
 	init_icmp_header(&packet->icmp_header);
 	init_icmp_data(packet->data);
 	packet->icmp_header.checksum = calculate_checksum(&packet->icmp_header, sizeof(packet->icmp_header) + PING_PACKET_DATA_SIZE);
+	return (0);
 }

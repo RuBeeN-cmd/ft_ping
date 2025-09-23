@@ -14,7 +14,7 @@ typedef struct	s_ping_packet
 	char			data[PING_PACKET_DATA_SIZE];
 }				t_ping_packet;
 
-void	create_packet(struct sockaddr_in dest_addr, t_ping_packet *packet);
+int		create_packet(struct sockaddr_in dest_addr, t_ping_packet *packet);
 void	dbg_packet(t_ping_packet *packet);
 
 #endif
