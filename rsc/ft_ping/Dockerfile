@@ -1,7 +1,5 @@
 FROM    	debian:bullseye
 
-RUN			echo "wireshark-common wireshark-common/install-setuid boolean true" | debconf-set-selections \
-				&& apt install -y wireshark
 
 RUN			apt update && DEBIAN_FRONTEND=noninteractive apt install -y inetutils-ping \
 				make \
@@ -9,9 +7,11 @@ RUN			apt update && DEBIAN_FRONTEND=noninteractive apt install -y inetutils-ping
 				zsh \
 				curl \
 				git \
-				valgrind \
-				wireshark
-				
+				valgrind
+
+RUN			echo "wireshark-common wireshark-common/install-setuid boolean true" | debconf-set-selections \
+				&& apt install -y wireshark
+
 RUN			sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
 WORKDIR		/ft_ping
