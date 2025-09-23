@@ -11,15 +11,12 @@ uint8_t send_echo_request(int socket, struct sockaddr_in dest, t_ping_packet pac
 {
 	ssize_t	send_ret = 0;
 	
-	printf("Sending Packet:\n");
-	(void) socket;
-	(void) dest;
-	(void) packet;
+	INFO("Sending Packet:\n");
 	dbg_packet(&packet);
 
-	printf("Socket: %d\n", socket);
-	printf("Destination: %s\n", inet_ntoa(dest.sin_addr));
-	printf("Packet size: %zu\n", sizeof(packet));
+	DBG("Socket: %d\n", socket);
+	DBG("Destination: %s\n", inet_ntoa(dest.sin_addr));
+	DBG("Packet size: %zu\n", sizeof(packet));
 	send_ret = sendto(socket, &packet, sizeof(packet), 0, (struct sockaddr *) &dest, sizeof(dest));
 	if (send_ret == -1)
 		return (1);

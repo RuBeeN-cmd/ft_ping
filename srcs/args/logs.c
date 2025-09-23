@@ -7,6 +7,12 @@ static void	try_help()
 	ERR("Try '%s --help' or '%s --usage' for more information.\n", PROGRAM_NAME, PROGRAM_NAME);
 }
 
+void	invalid_value(char *program_name, char value[])
+{
+	ERR("%s: invalid value (`%s' near `%s')\n", program_name, value, value);
+	try_help();
+}
+
 void	invalid_option(char *program_name, char opt)
 {
 	ERR("%s: invalid option -- '%c'\n", program_name, opt);
@@ -43,9 +49,9 @@ static void	print_options(t_opt opts[], size_t opts_nb)
 	for (size_t i = 0; i < opts_nb; i++)
 	{
 		if (opts[i].short_flag)
-			printf(" -%c", opts[i].short_flag);
+			INFO(" -%c", opts[i].short_flag);
 		else
-			printf("   ");
+			INFO("   ");
 		if (opts[i].short_flag && opts[i].long_flag)
 			printf(",");
 		else
@@ -65,12 +71,15 @@ static void	print_options(t_opt opts[], size_t opts_nb)
 
 void	help(t_opt opts[], size_t opts_nb)
 {
-	printf("Usage: %s [OPTION...] HOST ...\n\
-Send ICMP ECHO_REQUEST packets to network hosts.\n\n", PROGRAM_NAME);
+	INFO("Usage: %s [OPTION...] HOST ...\n", PROGRAM_NAME);
+	INFO("Send ICMP ECHO_REQUEST packets to network hosts.\n");
+	INFO("\n");
 	print_options(opts, opts_nb);
-	printf("\nMandatory or optional arguments to long options are also mandatory or optional\n\
-for any corresponding short options.\n\n\
-Options marked with (root only) are available only to superuser.\n");
+	INFO("\n");
+	INFO("Mandatory or optional arguments to long options are also mandatory or optional\n");
+	INFO("for any corresponding short options.\n");
+	INFO("\n");
+	INFO("Options marked with (root only) are available only to superuser.\n");
 }
 
 void	version()
@@ -105,5 +114,5 @@ void	usage(t_opt opts[], size_t opts_nb)
 		}
 	}
 	sprintf(crt_short_opt, "]");
-	printf("Usage: %s%s%s%s HOST ...\n", PROGRAM_NAME, short_opt, short_opt_with_val, long_opt);
+	INFO("Usage: %s%s%s%s HOST ...\n", PROGRAM_NAME, short_opt, short_opt_with_val, long_opt);
 }

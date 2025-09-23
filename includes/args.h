@@ -5,12 +5,6 @@
 #include <stddef.h>
 #include <stdio.h>
 
-typedef enum e_opt_category
-{
-	MISC_CAT,
-	INFO_CAT
-} t_opt_category;
-
 typedef struct	s_opt
 {
 	char			short_flag;
@@ -18,7 +12,6 @@ typedef struct	s_opt
 	char			*description;
 	int				has_arg;
 	char			*arg_name;
-	t_opt_category	category;
 	int				can_interrupt;
 }				t_opt;
 
@@ -29,10 +22,10 @@ typedef struct	s_opt
 #define OPTS_NB		4
 
 #define	OPTS { \
-	((t_opt) {'c', "count", "stop after sending NUMBER packets", 1, "NUMBER", MISC_CAT, 0}), \
-	((t_opt) {'?', "help", "give this help list", 0, NULL, INFO_CAT, 1}), \
-	((t_opt) {0, "usage", "give a short usage message", 0, NULL, INFO_CAT, 1}), \
-	((t_opt) {'V', "version", "print program version", 0, NULL, INFO_CAT, 1}), \
+	((t_opt) {'c', "count", "stop after sending NUMBER packets", 1, "NUMBER", 0}), \
+	((t_opt) {'?', "help", "give this help list", 0, NULL, 1}), \
+	((t_opt) {0, "usage", "give a short usage message", 0, NULL, 1}), \
+	((t_opt) {'V', "version", "print program version", 0, NULL, 1}), \
 }
 
 typedef struct	s_opts
@@ -48,6 +41,7 @@ int		has_flag(uint64_t bitmap, uint32_t flag);
 int		get_first_interrupt_flag(uint64_t bitmap);
 
 void	invalid_option(char *program_name, char opt);
+void	invalid_value(char *program_name, char value[]);
 void	unrecognized_option(char *program_name, char *opt);
 void	long_opt_arg_required(char *program_name, char *opt);
 void	short_opt_arg_required(char *program_name, char opt);
