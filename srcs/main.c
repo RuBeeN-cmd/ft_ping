@@ -1,5 +1,4 @@
 #include <ft_ping.h>
-
 #include <unistd.h>
 
 int main(int argc, char *argv[]) {
@@ -7,11 +6,10 @@ int main(int argc, char *argv[]) {
 
 	t_context c = {0};
 	int ret = init_context(&c, argc, argv);
-	if (ret < 0)
-		return (1);
-	else if (ret == 1)
-		return (0);
+	if (ret)
+		return (ret == -1);
 
+	init_stats(&c.stats);
 	for (size_t i = 0; c.opts.hosts[i]; i++)
 	{
 		struct sockaddr_in dest_addr;
@@ -21,26 +19,26 @@ int main(int argc, char *argv[]) {
 			WARN("Failed to convert address: %s\n", c.opts.hosts[i]);
 			continue ;
 		}
-		DBG("Count: %u\n", c.opts.count);
-		uint32_t j = 0;
-		while (j < c.opts.count || !has_flag(c.opts.bitmap, COUNT_OPT)) {
-			uint16_t sequence = 0;
-			t_ping_packet packet = {};
-			if (create_packet(dest_addr, &packet, sequence)) {
-				WARN("Failed to create packet for: %s\n", c.opts.hosts[i]);
-				continue ;
-			}
-			INFO("PING %s (%s): %d data bytes\n", c.opts.hosts[i], inet_ntoa(dest_addr.sin_addr), PING_PACKET_DATA_SIZE);
-			if (send_echo_request(c.send_socket, dest_addr, packet)) {
+		t_ping_packet p = {};
+		if (create_ping_packet(dest_addr, &p)) {
+			WARN("Failed to create packet for: %s\n", c.opts.hosts[i]);
+			continue ;
+		}
+		INFO("PING %s (%s): %d data bytes\n", c.opts.hosts[i], inet_ntoa(dest_addr.sin_addr), PING_PACKET_DATA_SIZE);
+		for (uint32_t j = 0; \
+			(j < c.opts.count || !has_flag(c.opts.bitmap, COUNT_OPT) || !c.opts.count) && !is_early_exit(); \
+			j++) {
+			if (send_echo_request(c.send_socket, dest_addr, &p)) {
 				WARN("Failed to send echo request for: %s\n", c.opts.hosts[i]);
 				continue;
 			}
-			capture_response(&packet, c.recv_socket);
+			capture_response(&c.stats, &p, c.recv_socket);
+			update_packet(&p);
 			sleep(1);
-			sequence++;
-			j++;
 		}
-
+		calculate_metrics(&c.stats);
+		INFO("--- %s ping statistics ---\n", c.opts.hosts[i]);
+		INFO("round-trip min/avg/max/stddev = %.3f/%.3f/%.3f/%.3f ms\n", c.stats.min_time, c.stats.avg_time, c.stats.max_time, c.stats.stddev_time);
 	}
 	close_context(&c);
 	return (0);

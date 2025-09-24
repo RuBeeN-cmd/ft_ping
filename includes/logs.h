@@ -11,10 +11,10 @@ typedef enum e_log_level {
 	ERROR
 } t_log_level;
 
-#define DBG_PREFIX	PURPLE"[DBG]"RESET
-#define INFO_PREFIX	GREEN"[INF]"RESET
-#define WARN_PREFIX	YELLOW"[WRN]"RESET
-#define ERR_PREFIX	RED"[ERR]"RESET
+#define DBG_PREFIX	"["PURPLE"DBG"RESET"]"
+#define INFO_PREFIX	"["GREEN"INF"RESET"]"
+#define WARN_PREFIX	"["YELLOW"WRN"RESET"]"
+#define ERR_PREFIX	"["RED"ERR"RESET"]"
 
 #define LOG(_level_, _format_, ...) do { \
 	if (_level_ >= *get_log_level()) { \

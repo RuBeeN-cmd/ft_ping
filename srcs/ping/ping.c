@@ -1,25 +1,22 @@
 #include <args.h>
+#include <sys/time.h>
 #include <sys/socket.h>
 #include <netinet/ip_icmp.h>
 #include <netinet/ip.h>
 #include <netinet/in.h>
 #include <unistd.h>
-
 #include <ft_ping.h>
 
-uint8_t send_echo_request(int socket, struct sockaddr_in dest, t_ping_packet packet)
+uint8_t send_echo_request(int socket, struct sockaddr_in dest, t_ping_packet *p)
 {
 	ssize_t	send_ret = 0;
-	
-	INFO("Sending Packet:\n");
-	dbg_packet(&packet);
 
-	DBG("Socket: %d\n", socket);
-	DBG("Destination: %s\n", inet_ntoa(dest.sin_addr));
-	DBG("Packet size: %zu\n", sizeof(packet));
-	send_ret = sendto(socket, &packet, sizeof(packet), 0, (struct sockaddr *) &dest, sizeof(dest));
+	send_ret = sendto(socket, &(p->packet), sizeof(p->packet), 0, (struct sockaddr *) &dest, sizeof(dest));
 	if (send_ret == -1)
 		return (1);
+	struct timeval send_time;
+	gettimeofday(&send_time, NULL);
+	p->send_timestamp = send_time;
 	return (0);
 }
 
@@ -56,15 +53,11 @@ int get_source_ip(struct in_addr *src_addr)
 	return (0);
 }
 
-int	capture_response(t_ping_packet *packet_sent, int recv_socket)
+int	capture_response(t_stats *stats, t_ping_packet *p, int recv_socket)
 {
-	(void) packet_sent;
 	struct sockaddr_in from_addr = {};
 	socklen_t addr_size = sizeof(from_addr);
 
-	INFO("Receiving Packet...\n");
-	DBG("Socket: %d\n", recv_socket);
-	
 	char buffer[1024] = {};
 	ssize_t captured_bytes = recvfrom(recv_socket, buffer, sizeof(buffer), 0, 
 									  (struct sockaddr *) &from_addr, &addr_size);
@@ -72,12 +65,19 @@ int	capture_response(t_ping_packet *packet_sent, int recv_socket)
 		perror("recvfrom");
 		return (1);
 	}
-	INFO("Packet Received !\n");
-	DBG("Received %zd bytes from %s\n", captured_bytes, inet_ntoa(from_addr.sin_addr));
-	dbg_packet((t_ping_packet *) &buffer);
-	
-	struct iphdr *ip_hdr = (struct iphdr *) buffer;
-	struct icmphdr *icmp_hdr = (struct icmphdr *) (buffer + (ip_hdr->ihl * 4));
-	DBG("ICMP Type: %d, Code: %d\n", icmp_hdr->type, icmp_hdr->code);
+	struct timeval send_time;
+	gettimeofday(&send_time, NULL);
+
+	long seconds = send_time.tv_sec - p->send_timestamp.tv_sec;
+	long micros = send_time.tv_usec - p->send_timestamp.tv_usec;
+	if (micros < 0) {
+		seconds--;
+		micros += 1000000;
+	}
+	add_time(stats, seconds * 1000 + micros / 1000.0);
+	INFO("%zd bytes from %s: icmp_seq=%d ttl=%d time=%.3f ms\n" \
+		, captured_bytes - sizeof(struct iphdr), inet_ntoa(from_addr.sin_addr), \
+		p->packet.icmp_header.un.echo.sequence, p->packet.ip_header.ttl, \
+		seconds * 1000 + micros / 1000.0);
 	return (0);
 }

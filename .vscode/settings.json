@@ -16,6 +16,11 @@
 		"unistd.h": "c",
 		"in.h": "c",
 		"ft_ping.h": "c",
-		"stdlib.h": "c"
+		"stdlib.h": "c",
+		"signal.h": "c",
+		"memory": "c",
+		"sigaction.h": "c",
+		"signals.h": "c",
+		"time.h": "c"
 	}
 }

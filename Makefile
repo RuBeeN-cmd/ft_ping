@@ -13,7 +13,9 @@ SRC = main.c \
 		ping/packet.c \
 		ping/ping.c \
 		logs/logs.c \
-		ping/context.c
+		ping/context.c \
+		ping/stats.c \
+		ping/signals.c
 
 
 OBJ = $(addprefix $(OBJ_DIR)/, $(SRC:.c=.o))
@@ -23,7 +25,7 @@ CFLAGS = -Wall -Werror -Wextra -g3
 INC = -Iincludes -Ilibft/includes
 
 LIB = libft/libft.a
-LIBFLAGS = $(addprefix -L, $(dir $(LIB))) $(addprefix -l, $(notdir $(subst lib,,$(basename $(LIB)))))
+LIBFLAGS = $(addprefix -L, $(dir $(LIB))) $(addprefix -l, $(notdir $(subst lib,,$(basename $(LIB))))) -lm
 
 SRC_DIR = srcs
 OBJ_DIR = objs

@@ -42,19 +42,31 @@ int	init_context(t_context *c, int argc, char *argv[])
 
 	c->send_socket = create_send_socket();
 	if (c->send_socket < 0) {
-		free(c->opts.hosts);
 		ERR("Failed to create send socket\n");
-		return (-1);
+		goto exit_3;
 	}
 
 	c->recv_socket = create_recv_socket();
 	if (c->recv_socket < 0) {
-		free(c->opts.hosts);
-		close(c->send_socket);
 		ERR("Failed to create receive socket\n");
-		return (-1);
+		goto exit_2;
 	}
+
+	if (init_signals()) {
+		ERR("Failed to initialize signals\n");
+		goto exit_1;
+	}
+
+	init_stats(&c->stats);
 	return (0);
+
+	exit_1:
+	close(c->recv_socket);
+	exit_2:
+	close(c->send_socket);
+	exit_3:
+	free(c->opts.hosts);
+	return (-1);
 }
 
 void	close_context(t_context *c)
@@ -69,4 +81,5 @@ void	close_context(t_context *c)
 	}
 	DBG("Freeing host list\n");
 	free(c->opts.hosts);
+	free_stats(&c->stats);
 }

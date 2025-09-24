@@ -121,7 +121,7 @@ int parse_args(int argc, char *argv[], t_opts *parsed_opts)
 	parsed_opts->bitmap = 0;
 	char	*hosts[1024];
 	size_t	host_nb = 0;
-	int		interrupting_flag = 0;
+	int		interrupting_flag = -1;
 
 	char	*program_name = argv[0];
 	for (size_t i = 1; i < (size_t) argc; i++)
@@ -159,8 +159,10 @@ int parse_args(int argc, char *argv[], t_opts *parsed_opts)
 		help(opts, opts_nb);
 	if (interrupting_flag == VERSION_OPT)
 		version();
-	if (interrupting_flag >= 0)
+	if (interrupting_flag >= 0) {
+		DBG("Interrupting flag detected, exiting early: %d\n", interrupting_flag);
 		return (1);
+	}
 	if (host_nb == 0) {
 		missing_host(program_name);
 		return (-1);

@@ -6,12 +6,12 @@
 #include <libft.h>
 #include <ft_ping.h>
 
-void	dbg_packet(t_ping_packet *packet)
+void	dbg_packet(t_packet *packet)
 {
 	char buffer[1024] = {};
 	char *crt = buffer; 
 	char *color = "\033[0;32m";
-	for (int i = 0; (long unsigned) i < sizeof(t_ping_packet); i++)
+	for (int i = 0; (long unsigned) i < sizeof(t_packet); i++)
 	{
 		if ((unsigned long)i >= sizeof(struct iphdr))
 			color = "\033[0;34m";
@@ -30,7 +30,10 @@ void	dbg_packet(t_ping_packet *packet)
 	sprintf(crt, "\n");
 }
 
-uint16_t	calculate_checksum(void *buffer, size_t length)
+/**
+ * @brief https://datatracker.ietf.org/doc/html/rfc1071#section-4.1
+ */
+uint16_t	 calculate_checksum(void *buffer, size_t length)
 {
 	uint32_t	sum = 0;
 	uint16_t	*ptr = (uint16_t *) buffer;
@@ -72,18 +75,12 @@ int	init_ip_header(struct iphdr *ip_header, size_t packet_size, in_addr_t dest_a
 	return (0);
 }
 
-static int get_ping_id()
-{
-	static int ping_id = 0;
-	return ping_id++;
-}
-
 void	init_icmp_header(struct icmphdr *icmp_header, uint16_t sequence)
 {
 	icmp_header->type = ICMP_ECHO;
 	icmp_header->code = 0;
 	icmp_header->checksum = 0;
-	icmp_header->un.echo.id = htons(get_ping_id());
+	icmp_header->un.echo.id = htons(getpid() & 0xFFFF);
 	icmp_header->un.echo.sequence = sequence;
 }
 
@@ -103,7 +100,7 @@ void	init_icmp_data(char *data)
 	}
 }
 
-int	create_packet(struct sockaddr_in dest_addr, t_ping_packet *packet, uint16_t sequence)
+int	create_packet(struct sockaddr_in dest_addr, t_packet *packet)
 {
 
 	if (init_ip_header(&packet->ip_header, sizeof(packet->ip_header)
@@ -111,8 +108,22 @@ int	create_packet(struct sockaddr_in dest_addr, t_ping_packet *packet, uint16_t 
 	{
 		return (1);
 	}
-	init_icmp_header(&packet->icmp_header, sequence);
+	init_icmp_header(&packet->icmp_header, 0);
 	init_icmp_data(packet->data);
 	packet->icmp_header.checksum = calculate_checksum(&packet->icmp_header, sizeof(packet->icmp_header) + PING_PACKET_DATA_SIZE);
 	return (0);
+}
+
+int	create_ping_packet(struct sockaddr_in dest_addr, t_ping_packet *p)
+{
+	if (create_packet(dest_addr, &p->packet))
+		return (1);
+	ft_bzero(&p->send_timestamp, sizeof(p->send_timestamp));
+	return (0);
+}
+
+void	update_packet(t_ping_packet *p)
+{
+	init_icmp_header(&p->packet.icmp_header, p->packet.icmp_header.un.echo.sequence + 1);
+	p->packet.icmp_header.checksum = calculate_checksum(&p->packet.icmp_header, sizeof(p->packet.icmp_header) + PING_PACKET_DATA_SIZE);
 }
