@@ -84,7 +84,7 @@ void	help(t_opt opts[], size_t opts_nb)
 
 void	version()
 {
-	printf("%s version %s\n", PROGRAM_NAME, PROGRAM_VERSION);
+	INFO("%s version %s\n", PROGRAM_NAME, PROGRAM_VERSION);
 }
 
 void	usage(t_opt opts[], size_t opts_nb)

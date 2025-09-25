@@ -61,13 +61,11 @@ int	capture_response(t_stats *stats, t_ping_packet *p, int recv_socket)
 	char buffer[1024] = {};
 	ssize_t captured_bytes = recvfrom(recv_socket, buffer, sizeof(buffer), 0, 
 									  (struct sockaddr *) &from_addr, &addr_size);
-	if (captured_bytes == -1) {
-		perror("recvfrom");
+	if (captured_bytes == -1)
 		return (1);
-	}
 	struct timeval send_time;
 	gettimeofday(&send_time, NULL);
-
+	
 	long seconds = send_time.tv_sec - p->send_timestamp.tv_sec;
 	long micros = send_time.tv_usec - p->send_timestamp.tv_usec;
 	if (micros < 0) {

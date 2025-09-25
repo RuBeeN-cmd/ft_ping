@@ -42,12 +42,39 @@ int	match_short_opt(t_opt opts[], size_t opts_nb, char arg)
 
 static int	assign_value(t_opts *parsed_opts, int opt_index, char *value)
 {
+	t_opt	opts[OPTS_NB] = OPTS;
+	size_t	opts_nb = OPTS_NB;
+
 	if (opt_index == COUNT_OPT) {
 		int64_t	val = str_to_u32(value);
 		if (val < 0) {
-			return (1);
+			return (-1);
 		}
 		parsed_opts->count = val;
+	} else if (opt_index == VERBOSE_OPT) {
+		if (!ft_strncmp(value, "DEBUG", 6))
+			set_log_level(DEBUG);
+		else if (!ft_strncmp(value, "INFO", 5))
+			set_log_level(INFO);
+		else if (!ft_strncmp(value, "WARN", 5))
+			set_log_level(WARNING);
+		else if (!ft_strncmp(value, "ERROR", 6))
+			set_log_level(ERROR);
+		else
+			return (-1);
+	} else if (opt_index == NO_COLOR_OPT) {
+		disable_ansi_colors();
+	} else if (opt_index == NO_PREFIX_OPT) {
+		disable_prefix();
+	} else if (opt_index == HELP_OPT) {
+		help(opts, opts_nb);
+		return (1);
+	} else if (opt_index == USAGE_OPT) {
+		usage(opts, opts_nb);
+		return (1);
+	} else if (opt_index == VERSION_OPT) {
+		version();
+		return (1);
 	}
 	return (0);
 }
@@ -59,7 +86,7 @@ static int	parse_long_opt(t_opts *parsed_opts, char program_name[], char arg[], 
 
 	char	*opt = arg + 2;
 	char	*equal_sign = ft_strchr(opt, '=');
-	char	*opt_value;
+	char	*opt_value = NULL;
 	if (equal_sign) {
 		*equal_sign = 0;
 		opt_value = equal_sign + 1;
@@ -78,10 +105,13 @@ static int	parse_long_opt(t_opts *parsed_opts, char program_name[], char arg[], 
 			opt_value = *next_arg;
 			*next_arg = NULL;
 		}
-		if (assign_value(parsed_opts, opt_index, opt_value)) {
-			invalid_value(program_name, opt_value);
-			return (1);
-		}
+	}
+	int ret = assign_value(parsed_opts, opt_index, opt_value);
+	if (ret < 0) {
+		invalid_value(program_name, opt_value);
+		return (-1);
+	} else if (ret) {
+		return (1);
 	}
 	parsed_opts->bitmap ^= 1 << opt_index;
 	return (0);
@@ -97,7 +127,7 @@ static int parse_short_opt(t_opts *parsed_opts, char program_name[], char arg, c
 		invalid_option(program_name, arg);
 		return (1);
 	}
-	char	*opt_value;
+	char	*opt_value = NULL;
 	if (opts[opt_index].has_arg) {
 		if (!*next_arg) {
 			short_opt_arg_required(program_name, arg);
@@ -105,10 +135,13 @@ static int parse_short_opt(t_opts *parsed_opts, char program_name[], char arg, c
 		}
 		opt_value = *next_arg;
 		*next_arg = NULL;
-		if (assign_value(parsed_opts, opt_index, opt_value)) {
-			invalid_value(program_name, opt_value);
-			return (1);
-		}
+	}
+	int ret = assign_value(parsed_opts, opt_index, opt_value);
+	if (ret < 0) {
+		invalid_value(program_name, opt_value);
+		return (-1);
+	} else if (ret) {
+		return (1);
 	}
 	parsed_opts->bitmap ^= 1 << opt_index;
 	return (0);
@@ -116,12 +149,9 @@ static int parse_short_opt(t_opts *parsed_opts, char program_name[], char arg, c
 
 int parse_args(int argc, char *argv[], t_opts *parsed_opts)
 {
-	t_opt	opts[OPTS_NB] = OPTS;
-	size_t	opts_nb = OPTS_NB;
 	parsed_opts->bitmap = 0;
 	char	*hosts[1024];
 	size_t	host_nb = 0;
-	int		interrupting_flag = -1;
 
 	char	*program_name = argv[0];
 	for (size_t i = 1; i < (size_t) argc; i++)
@@ -130,38 +160,22 @@ int parse_args(int argc, char *argv[], t_opts *parsed_opts)
 			continue ;
 		if (argv[i][0] == '-' && argv[i][1] == '-')
 		{
-			if (parse_long_opt(parsed_opts, program_name, argv[i], i + 1 <= (size_t) argc ? argv + i + 1 : NULL)) {
-				return (-1);
-			}
-			if ((interrupting_flag = get_first_interrupt_flag(parsed_opts->bitmap)) >= 0)
-				break;
+			int ret = parse_long_opt(parsed_opts, program_name, argv[i], i + 1 <= (size_t) argc ? argv + i + 1 : NULL);
+			if (ret)
+				return (ret);
 		}
 		else if (argv[i][0] == '-' && argv[i][1])
 		{
 			size_t	arg_len = ft_strlen(argv[i]);
 			for (size_t j = 1; j < arg_len; j++)
 			{
-				if (parse_short_opt(parsed_opts, program_name, argv[i][j], (i + 1 <= (size_t) argc ? argv + i + 1 : NULL))) {
-					return (-1);
-				}
-				if ((interrupting_flag = get_first_interrupt_flag(parsed_opts->bitmap)) >= 0)
-					break;
+				int ret = parse_short_opt(parsed_opts, program_name, argv[i][j], (i + 1 <= (size_t) argc ? argv + i + 1 : NULL));
+				if (ret)
+					return (ret);
 			}
-			if (interrupting_flag >= 0)
-				break;
 		} else {
 			hosts[host_nb++] = argv[i];
 		}
-	}
-	if (interrupting_flag == USAGE_OPT)
-		usage(opts, opts_nb);
-	if (interrupting_flag == HELP_OPT)
-		help(opts, opts_nb);
-	if (interrupting_flag == VERSION_OPT)
-		version();
-	if (interrupting_flag >= 0) {
-		DBG("Interrupting flag detected, exiting early: %d\n", interrupting_flag);
-		return (1);
 	}
 	if (host_nb == 0) {
 		missing_host(program_name);

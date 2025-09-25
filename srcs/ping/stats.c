@@ -23,13 +23,16 @@ void	add_time(t_stats *stats, double time)
 	if (!time_ptr)
 		return ;
 	*time_ptr = time;
+	stats->received++;
 	ft_lstadd_back(&stats->times, ft_lstnew(time_ptr));
 }
 
 void	free_stats(t_stats *stats)
 {
-	if (stats->times)
+	if (stats->times) {
+		DBG("Freeing stats times list\n");
 		ft_lstclear(&stats->times, free);
+	}
 }
 
 void	calculate_average(t_stats *stats)

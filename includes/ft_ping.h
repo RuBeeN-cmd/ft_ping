@@ -25,10 +25,10 @@ typedef struct	s_stats
 
 typedef struct s_context
 {
-	t_opts			opts;
-	int 			send_socket;
-	int 			recv_socket;
-	t_stats			stats;
+	t_opts	opts;
+	int 	send_socket;
+	int 	recv_socket;
+	t_stats	stats;
 } t_context;
 
 // context
