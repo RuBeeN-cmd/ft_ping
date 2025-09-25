@@ -16,7 +16,6 @@ int main(int argc, char *argv[]) {
 	int ret = init_context(&c, argc, argv);
 	if (ret)
 		return (ret == -1);
-
 	for (size_t i = 0; c.opts.hosts[i]; i++)
 	{
 		struct sockaddr_in dest_addr;
@@ -26,7 +25,7 @@ int main(int argc, char *argv[]) {
 		}
 
 		t_ping_packet p = {};
-		if (create_ping_packet(dest_addr, &p)) {
+		if (create_ping_packet(dest_addr, &p, c.opts.ttl)) {
 			WARN("Failed to create packet for: %s\n", c.opts.hosts[i]);
 			continue ;
 		}

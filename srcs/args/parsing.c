@@ -53,29 +53,33 @@ static int	assign_value(t_opts *parsed_opts, int opt_index, char *value)
 		parsed_opts->count = val;
 	} else if (opt_index == VERBOSE_OPT) {
 		if (!ft_strncmp(value, "DEBUG", 6))
-			set_log_level(DEBUG);
+			set_log_level(LEVEL_DEBUG);
 		else if (!ft_strncmp(value, "INFO", 5))
-			set_log_level(INFO);
+			set_log_level(LEVEL_INFO);
 		else if (!ft_strncmp(value, "WARN", 5))
-			set_log_level(WARNING);
+			set_log_level(LEVEL_WARNING);
 		else if (!ft_strncmp(value, "ERROR", 6))
-			set_log_level(ERROR);
+			set_log_level(LEVEL_ERROR);
 		else
 			return (-1);
 	} else if (opt_index == NO_COLOR_OPT) {
-		disable_ansi_colors();
+		disable_colors();
 	} else if (opt_index == NO_PREFIX_OPT) {
 		disable_prefix();
 	} else if (opt_index == HELP_OPT) {
 		help(opts, opts_nb);
-		return (1);
 	} else if (opt_index == USAGE_OPT) {
 		usage(opts, opts_nb);
-		return (1);
 	} else if (opt_index == VERSION_OPT) {
 		version();
-		return (1);
+	} else if (opt_index == TTL_OPT) {
+		int64_t	val = str_to_u32(value);
+		if (val <= 0 || val > 255)
+			return (-1);
+		parsed_opts->ttl = val;
 	}
+	if (opts[opt_index].can_interrupt)
+		return (1);
 	return (0);
 }
 
@@ -150,6 +154,8 @@ static int parse_short_opt(t_opts *parsed_opts, char program_name[], char arg, c
 int parse_args(int argc, char *argv[], t_opts *parsed_opts)
 {
 	parsed_opts->bitmap = 0;
+	parsed_opts->ttl = 64;
+	parsed_opts->count = 0;
 	char	*hosts[1024];
 	size_t	host_nb = 0;
 

@@ -50,7 +50,7 @@ uint16_t	 calculate_checksum(void *buffer, size_t length)
 	return (htons(~sum));
 }
 
-int	init_ip_header(struct iphdr *ip_header, size_t packet_size, in_addr_t dest_addr)
+int	init_ip_header(struct iphdr *ip_header, size_t packet_size, in_addr_t dest_addr, uint8_t ttl)
 {
 	ip_header->ihl = sizeof(struct iphdr) / 4; 
 	ip_header->version = 4;
@@ -58,7 +58,7 @@ int	init_ip_header(struct iphdr *ip_header, size_t packet_size, in_addr_t dest_a
 	ip_header->tot_len = htons(packet_size);
 	ip_header->id = htons(getpid());
 	ip_header->frag_off = 0;
-	ip_header->ttl = 64;
+	ip_header->ttl = ttl;
 	ip_header->protocol = IPPROTO_ICMP;
 	ip_header->check = 0;
 
@@ -100,11 +100,11 @@ void	init_icmp_data(char *data)
 	}
 }
 
-int	create_packet(struct sockaddr_in dest_addr, t_packet *packet)
+int	create_packet(struct sockaddr_in dest_addr, t_packet *packet, uint8_t ttl)
 {
 
 	if (init_ip_header(&packet->ip_header, sizeof(packet->ip_header)
- 		+ sizeof(packet->icmp_header) + PING_PACKET_DATA_SIZE, dest_addr.sin_addr.s_addr))
+ 		+ sizeof(packet->icmp_header) + PING_PACKET_DATA_SIZE, dest_addr.sin_addr.s_addr, ttl))
 	{
 		return (1);
 	}
@@ -114,9 +114,9 @@ int	create_packet(struct sockaddr_in dest_addr, t_packet *packet)
 	return (0);
 }
 
-int	create_ping_packet(struct sockaddr_in dest_addr, t_ping_packet *p)
+int	create_ping_packet(struct sockaddr_in dest_addr, t_ping_packet *p, uint8_t ttl)
 {
-	if (create_packet(dest_addr, &p->packet))
+	if (create_packet(dest_addr, &p->packet, ttl))
 		return (1);
 	ft_bzero(&p->send_timestamp, sizeof(p->send_timestamp));
 	return (0);
