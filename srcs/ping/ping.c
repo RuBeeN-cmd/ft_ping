@@ -53,6 +53,18 @@ int get_source_ip(struct in_addr *src_addr)
 	return (0);
 }
 
+static struct timeval calculate_time_diff(struct timeval *start, struct timeval *end)
+{
+	long sec = end->tv_sec - start->tv_sec;
+	long micros = end->tv_usec - start->tv_usec;
+	if (micros < 0) {
+		sec--;
+		micros += 1000000;
+	}
+	struct timeval result = {sec, micros};
+	return result;
+}
+
 int	capture_response(t_stats *stats, t_ping_packet *p, int recv_socket)
 {
 	struct sockaddr_in from_addr = {};
@@ -63,19 +75,35 @@ int	capture_response(t_stats *stats, t_ping_packet *p, int recv_socket)
 									  (struct sockaddr *) &from_addr, &addr_size);
 	if (captured_bytes == -1)
 		return (1);
-	struct timeval send_time;
-	gettimeofday(&send_time, NULL);
-	
-	long seconds = send_time.tv_sec - p->send_timestamp.tv_sec;
-	long micros = send_time.tv_usec - p->send_timestamp.tv_usec;
-	if (micros < 0) {
-		seconds--;
-		micros += 1000000;
+	struct timeval recv_time;
+	gettimeofday(&recv_time, NULL);
+
+	if (captured_bytes < (ssize_t)(sizeof(struct iphdr) + sizeof(struct icmphdr))) {
+		DBG("Received packet is too small (%zd bytes)\n", captured_bytes);
+		return (capture_response(stats, p, recv_socket));
 	}
-	add_time(stats, seconds * 1000 + micros / 1000.0);
+
+	if (((struct iphdr *)buffer)->protocol != IPPROTO_ICMP) {
+		DBG("Received packet is not ICMP (protocol %d)\n", ((struct iphdr *)buffer)->protocol);
+		return (capture_response(stats, p, recv_socket));
+	}
+
+	t_packet *recv_packet = (t_packet *)(buffer);
+	if (recv_packet->icmp_header.type != ICMP_ECHOREPLY) {
+		DBG("Received ICMP packet is not ECHOREPLY (type %d)\n", recv_packet->icmp_header.type);
+		return (capture_response(stats, p, recv_socket));
+	}
+	if (recv_packet->icmp_header.un.echo.id != p->packet.icmp_header.un.echo.id
+		|| recv_packet->icmp_header.un.echo.sequence != p->packet.icmp_header.un.echo.sequence) {
+		DBG("Received ICMP packet ID does not match (got %d, expected %d)\n", ntohs(recv_packet->icmp_header.un.echo.id), getpid());
+		return (capture_response(stats, p, recv_socket));
+	}
+
+	struct timeval time_diff = calculate_time_diff(&p->send_timestamp, &recv_time);
+	add_time(stats, time_diff.tv_sec * 1000 + time_diff.tv_usec / 1000.0);
 	INFO("%zd bytes from %s: icmp_seq=%d ttl=%d time=%.3f ms\n" \
 		, captured_bytes - sizeof(struct iphdr), inet_ntoa(from_addr.sin_addr), \
-		p->packet.icmp_header.un.echo.sequence, p->packet.ip_header.ttl, \
-		seconds * 1000 + micros / 1000.0);
+		recv_packet->icmp_header.un.echo.sequence, recv_packet->ip_header.ttl, \
+		time_diff.tv_sec * 1000 + time_diff.tv_usec / 1000.0);
 	return (0);
 }

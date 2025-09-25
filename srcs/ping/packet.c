@@ -80,7 +80,7 @@ void	init_icmp_header(struct icmphdr *icmp_header, uint16_t sequence)
 	icmp_header->type = ICMP_ECHO;
 	icmp_header->code = 0;
 	icmp_header->checksum = 0;
-	icmp_header->un.echo.id = htons(getpid() & 0xFFFF);
+	icmp_header->un.echo.id = htons(getpid());
 	icmp_header->un.echo.sequence = sequence;
 }
 
