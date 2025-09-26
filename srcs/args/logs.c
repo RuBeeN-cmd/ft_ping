@@ -58,7 +58,7 @@ static void	print_options(t_opt opts[], size_t opts_nb)
 			printf(" ");
 		if (opts[i].long_flag)
 		{
-			if (opts[i].has_arg)
+			if (opts[i].arg_name)
 				printf(" --%s=%s%*s", opts[i].long_flag, opts[i].arg_name, description_padding - (int) ft_strlen(opts[i].long_flag) - (int) ft_strlen(opts[i].arg_name) - 4, "");
 			else
 				printf(" --%s%*s", opts[i].long_flag, description_padding - (int) ft_strlen(opts[i].long_flag) - 3, "");
@@ -99,14 +99,14 @@ void	usage(t_opt opts[], size_t opts_nb)
 	for (size_t i = 0; i < opts_nb; i++)
 	{
 		if (opts[i].short_flag) {
-			if (opts[i].has_arg) {
+			if (opts[i].arg_name) {
 				crt_short_opt_with_val += sprintf(crt_short_opt_with_val, " [-%c %s]", opts[i].short_flag, opts[i].arg_name);
 			} else {
 				crt_short_opt += sprintf(crt_short_opt, "%c", opts[i].short_flag);
 			}
 		}
 		if (opts[i].long_flag) {
-			if (opts[i].has_arg) {
+			if (opts[i].arg_name) {
 				crt_long_opt += sprintf(crt_long_opt, " [--%s=%s]", opts[i].long_flag, opts[i].arg_name);
 			} else {
 				crt_long_opt += sprintf(crt_long_opt, " [--%s]", opts[i].long_flag);

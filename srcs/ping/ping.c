@@ -90,6 +90,13 @@ int	capture_response(t_stats *stats, t_ping_packet *p, int recv_socket)
 
 	t_packet *recv_packet = (t_packet *)(buffer);
 	if (recv_packet->icmp_header.type != ICMP_ECHOREPLY) {
+		if (recv_packet->icmp_header.type == ICMP_TIME_EXCEEDED) {
+			INFO("%s%zd%s bytes from %s%s%s: %sTime to live exceeded%s\n",
+				get_color(COLOR_BLUE), captured_bytes - sizeof(struct iphdr), get_color(COLOR_RESET),
+				get_color(COLOR_PURPLE), inet_ntoa(from_addr.sin_addr), get_color(COLOR_RESET),
+				get_color(COLOR_RED), get_color(COLOR_RESET));
+			return (0);
+		}
 		DBG("Received ICMP packet is not ECHOREPLY (type %d)\n", recv_packet->icmp_header.type);
 		return (capture_response(stats, p, recv_socket));
 	}
@@ -101,9 +108,12 @@ int	capture_response(t_stats *stats, t_ping_packet *p, int recv_socket)
 
 	struct timeval time_diff = calculate_time_diff(&p->send_timestamp, &recv_time);
 	add_time(stats, time_diff.tv_sec * 1000 + time_diff.tv_usec / 1000.0);
-	INFO("%zd bytes from %s: icmp_seq=%d ttl=%d time=%.3f ms\n" \
-		, captured_bytes - sizeof(struct iphdr), inet_ntoa(from_addr.sin_addr), \
-		recv_packet->icmp_header.un.echo.sequence, recv_packet->ip_header.ttl, \
-		time_diff.tv_sec * 1000 + time_diff.tv_usec / 1000.0);
+	INFO("%s%zd%s bytes from %s%s%s: icmp_seq=%s%d%s ttl=%s%d%s time=%s%.3f ms%s\n",
+		get_color(COLOR_BLUE), captured_bytes - sizeof(struct iphdr), get_color(COLOR_RESET),
+		get_color(COLOR_PURPLE), inet_ntoa(from_addr.sin_addr), get_color(COLOR_RESET),
+		get_color(COLOR_BLUE), recv_packet->icmp_header.un.echo.sequence, get_color(COLOR_RESET),
+		get_color(COLOR_YELLOW), recv_packet->ip_header.ttl, get_color(COLOR_RESET),
+		get_color(COLOR_CYAN), time_diff.tv_sec * 1000 + time_diff.tv_usec / 1000.0,
+		get_color(COLOR_RESET));
 	return (0);
 }

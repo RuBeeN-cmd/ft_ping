@@ -11,6 +11,23 @@ int	get_dest_addr(struct sockaddr_in *dest_addr, char addr_str[])
 	return (0);
 }
 
+void	print_header_line(uint8_t is_verbose, char hostname[], char ip[], uint16_t packet_id, int packet_data_size) {
+	if (is_verbose) {
+		INFO("PING %s%s%s (%s%s%s): %s%d%s data bytes, id %s0x%x%s = %s%d%s\n",
+			get_color(COLOR_PURPLE), hostname, get_color(COLOR_RESET),
+			get_color(COLOR_PURPLE), ip, get_color(COLOR_RESET),
+			get_color(COLOR_BLUE), packet_data_size, get_color(COLOR_RESET),
+			get_color(COLOR_GREEN), packet_id, get_color(COLOR_RESET),
+			get_color(COLOR_GREEN), packet_id, get_color(COLOR_RESET));
+	} else {
+		INFO("PING %s%s%s (%s%s%s): %s%d%s data bytes\n",
+			get_color(COLOR_PURPLE), hostname, get_color(COLOR_RESET),
+			get_color(COLOR_PURPLE), ip, get_color(COLOR_RESET),
+			get_color(COLOR_BLUE), packet_data_size, get_color(COLOR_RESET));
+	}
+}
+
+
 int main(int argc, char *argv[]) {
 	t_context c = {0};
 	int ret = init_context(&c, argc, argv);
@@ -29,22 +46,29 @@ int main(int argc, char *argv[]) {
 			WARN("Failed to create packet for: %s\n", c.opts.hosts[i]);
 			continue ;
 		}
-		INFO("PING %s (%s): %d data bytes\n", c.opts.hosts[i], inet_ntoa(dest_addr.sin_addr), PING_PACKET_DATA_SIZE);
-		while ((c.stats.sent < c.opts.count || !has_flag(c.opts.bitmap, COUNT_OPT) || !c.opts.count) && !is_early_exit()) {
+		dbg_packet(&p.packet);
+		print_header_line(has_flag(c.opts.bitmap, VERBOSE_OPT), c.opts.hosts[i], inet_ntoa(dest_addr.sin_addr), ntohs(p.packet.icmp_header.un.echo.id), PING_PACKET_DATA_SIZE);
+		t_stats stats;
+		init_stats(&stats);
+		while ((stats.sent < c.opts.count || !has_flag(c.opts.bitmap, COUNT_OPT) || !c.opts.count)) {
+			DBG("Sending packet\n");
 			if (send_echo_request(c.send_socket, dest_addr, &p)) {
 				WARN("Failed to send echo request for: %s\n", c.opts.hosts[i]);
 				continue;
 			}
-			c.stats.sent++;
-			capture_response(&c.stats, &p, c.recv_socket);
+			stats.sent++;
+			if (is_early_exit())
+				break;
+			DBG("Waiting for response...\n");
+			capture_response(&stats, &p, c.recv_socket);
 			update_packet(&p);
 			sleep(1);
+			if (is_early_exit())
+				break;
 		}
-		calculate_metrics(&c.stats);
-		INFO("--- %s ping statistics ---\n", c.opts.hosts[i]);
-		INFO("%d packets transmitted, %d packets received, %.1f%% packet loss\n", c.stats.sent, c.stats.received, c.stats.sent ? ((c.stats.sent - c.stats.received) * 100.0 / c.stats.sent) : 0);
-		if (c.stats.received)
-			INFO("round-trip min/avg/max/stddev = %.3f/%.3f/%.3f/%.3f ms\n", c.stats.min_time, c.stats.avg_time, c.stats.max_time, c.stats.stddev_time);
+		calculate_metrics(&stats);
+		show_stats(&stats, c.opts.hosts[i]);
+		free_stats(&stats);
 	}
 	close_context(&c);
 	return (0);

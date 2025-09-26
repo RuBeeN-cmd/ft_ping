@@ -51,7 +51,7 @@ static int	assign_value(t_opts *parsed_opts, int opt_index, char *value)
 			return (-1);
 		}
 		parsed_opts->count = val;
-	} else if (opt_index == VERBOSE_OPT) {
+	} else if (opt_index == LOG_OPT) {
 		if (!ft_strncmp(value, "DEBUG", 6))
 			set_log_level(LEVEL_DEBUG);
 		else if (!ft_strncmp(value, "INFO", 5))
@@ -100,7 +100,7 @@ static int	parse_long_opt(t_opts *parsed_opts, char program_name[], char arg[], 
 		unrecognized_option(program_name, arg);
 		return (1);
 	}
-	if (opts[opt_index].has_arg) {
+	if (opts[opt_index].arg_name) {
 		if (!equal_sign) {
 			if (!*next_arg) {
 				long_opt_arg_required(program_name, arg);
@@ -132,7 +132,7 @@ static int parse_short_opt(t_opts *parsed_opts, char program_name[], char arg, c
 		return (1);
 	}
 	char	*opt_value = NULL;
-	if (opts[opt_index].has_arg) {
+	if (opts[opt_index].arg_name) {
 		if (!*next_arg) {
 			short_opt_arg_required(program_name, arg);
 			return (1);

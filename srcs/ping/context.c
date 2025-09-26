@@ -57,7 +57,6 @@ int	init_context(t_context *c, int argc, char *argv[])
 		goto exit_1;
 	}
 
-	init_stats(&c->stats);
 	return (0);
 
 	exit_1:
@@ -72,14 +71,16 @@ int	init_context(t_context *c, int argc, char *argv[])
 void	close_context(t_context *c)
 {
 	if (c->send_socket >= 0) {
-		DBG("Closing send socket %d\n", c->send_socket);
+		DBG("%sClosing send socket %s%d%s\n", \
+			get_color(COLOR_RED), get_color(COLOR_ORANGE), c->send_socket, get_color(COLOR_RESET));
 		close(c->send_socket);
 	}
 	if (c->recv_socket >= 0) {
-		DBG("Closing receive socket %d\n", c->recv_socket);
+		DBG("%sClosing send socket %s%d%s\n", \
+			get_color(COLOR_RED), get_color(COLOR_ORANGE), c->recv_socket, get_color(COLOR_RESET));
 		close(c->recv_socket);
 	}
-	DBG("Freeing host list\n");
+	DBG("%sFreeing host list%s\n", \
+		get_color(COLOR_RED), get_color(COLOR_RESET));
 	free(c->opts.hosts);
-	free_stats(&c->stats);
 }

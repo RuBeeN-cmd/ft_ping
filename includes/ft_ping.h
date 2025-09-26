@@ -28,7 +28,6 @@ typedef struct s_context
 	t_opts	opts;
 	int 	send_socket;
 	int 	recv_socket;
-	t_stats	stats;
 } t_context;
 
 // context
@@ -45,5 +44,6 @@ void 	init_stats(t_stats *stats);
 void	add_time(t_stats *stats, double time);
 void	free_stats(t_stats *stats);
 void	calculate_metrics(t_stats *stats);
+void	show_stats(t_stats *stats, char *host);
 
 #endif

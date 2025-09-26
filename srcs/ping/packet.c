@@ -10,14 +10,14 @@ void	dbg_packet(t_packet *packet)
 {
 	char buffer[1024] = {};
 	char *crt = buffer; 
-	char *color = "\033[0;32m";
+	char *color = get_color(COLOR_GREEN);
 	for (int i = 0; (long unsigned) i < sizeof(t_packet); i++)
 	{
 		if ((unsigned long)i >= sizeof(struct iphdr))
-			color = "\033[0;34m";
+			color = get_color(COLOR_BLUE);
 		if ((unsigned long)i >= sizeof(struct iphdr) + sizeof(struct icmphdr))
-			color = "\033[0;35m";
-		crt += sprintf(crt, "%s%02X\033[0m ", color, *((uint8_t *) packet + i));
+			color = get_color(COLOR_PURPLE);
+		crt += sprintf(crt, "%s%02X%s ", color, *((uint8_t *) packet + i), get_color(COLOR_RESET));
 		if (i % 16 == 15) {
 			sprintf(crt, "\n");
 			DBG("%s", buffer);
