@@ -79,10 +79,12 @@ void	calculate_metrics(t_stats *stats)
 void	show_stats(t_stats *stats, char *host)
 {
 	INFO("--- %s%s%s ping statistics ---\n", get_color(COLOR_PURPLE), host, get_color(COLOR_RESET));
-	INFO("%s%d%s packets transmitted, %s%d%s packets received, %s%.1f%%%s packet loss\n",
+	double	percent_loss = stats->sent ? ((stats->sent - stats->received) * 100.0 / stats->sent) : 0;
+	char	*percent_loss_color = percent_loss == 0 ? get_color(COLOR_GREEN) : (percent_loss < 100 ? get_color(COLOR_ORANGE) : get_color(COLOR_RED));
+	INFO("%s%d%s packets transmitted, %s%d%s packets received, %s%d%%%s packet loss\n",
 		get_color(COLOR_BLUE), stats->sent, get_color(COLOR_RESET),
-		get_color(COLOR_GREEN), stats->received, get_color(COLOR_RESET),
-		get_color(COLOR_ORANGE), stats->sent ? ((stats->sent - stats->received) * 100.0 / stats->sent) : 0, get_color(COLOR_RESET));
+		percent_loss_color, stats->received, get_color(COLOR_RESET),
+		percent_loss_color, (int) percent_loss, get_color(COLOR_RESET));
 	if (stats->received) {
 		INFO("round-trip %smin%s/%savg%s/%smax%s/%sstddev%s = %s%.3f%s/%s%.3f%s/%s%.3f%s/%s%.3f%s ms\n",
 			get_color(COLOR_GREEN), get_color(COLOR_RESET),

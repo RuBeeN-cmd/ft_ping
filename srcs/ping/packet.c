@@ -57,7 +57,7 @@ int	init_ip_header(struct iphdr *ip_header, size_t packet_size, in_addr_t dest_a
 	ip_header->tos = IPTOS_CLASS_DEFAULT;
 	ip_header->tot_len = htons(packet_size);
 	ip_header->id = htons(getpid());
-	ip_header->frag_off = 0;
+	ip_header->frag_off = htons(0x4000);
 	ip_header->ttl = ttl;
 	ip_header->protocol = IPPROTO_ICMP;
 	ip_header->check = 0;
@@ -81,7 +81,7 @@ void	init_icmp_header(struct icmphdr *icmp_header, uint16_t sequence)
 	icmp_header->code = 0;
 	icmp_header->checksum = 0;
 	icmp_header->un.echo.id = htons(getpid());
-	icmp_header->un.echo.sequence = sequence;
+	icmp_header->un.echo.sequence = htons(sequence);
 }
 
 void	init_icmp_data(char *data)
@@ -124,6 +124,6 @@ int	create_ping_packet(struct sockaddr_in dest_addr, t_ping_packet *p, uint8_t t
 
 void	update_packet(t_ping_packet *p)
 {
-	init_icmp_header(&p->packet.icmp_header, p->packet.icmp_header.un.echo.sequence + 1);
+	init_icmp_header(&p->packet.icmp_header, ntohs(p->packet.icmp_header.un.echo.sequence) + 1);
 	p->packet.icmp_header.checksum = calculate_checksum(&p->packet.icmp_header, sizeof(p->packet.icmp_header) + PING_PACKET_DATA_SIZE);
 }

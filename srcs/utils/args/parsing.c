@@ -77,6 +77,16 @@ static int	assign_value(t_opts *parsed_opts, int opt_index, char *value)
 		if (val <= 0 || val > 255)
 			return (-1);
 		parsed_opts->ttl = val;
+	} else if (opt_index == TIMEOUT_OPT) {
+		int64_t	val = str_to_u32(value);
+		if (val < 0 || val > 1024)
+			return (-1);
+		parsed_opts->timeout = val;
+	} else if (opt_index == LINGER_OPT) {
+		int64_t	val = str_to_u32(value);
+		if (val < 0 || val > 1024)
+			return (-1);
+		parsed_opts->linger = val;
 	}
 	if (opts[opt_index].can_interrupt)
 		return (1);
@@ -155,6 +165,8 @@ int parse_args(int argc, char *argv[], t_opts *parsed_opts)
 {
 	parsed_opts->bitmap = 0;
 	parsed_opts->ttl = 64;
+	parsed_opts->linger = 1;
+	parsed_opts->timeout = 0;
 	parsed_opts->count = 0;
 	char	*hosts[1024];
 	size_t	host_nb = 0;

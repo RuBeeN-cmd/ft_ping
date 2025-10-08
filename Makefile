@@ -7,16 +7,19 @@ _CYAN="\033[0;36m"
 NAME = ft_ping
 
 SRC = main.c \
-		args/parsing.c \
-		args/logs.c \
-		args/flags.c \
+		utils/args/parsing.c \
+		utils/args/logs.c \
+		utils/args/flags.c \
+		utils/logs.c \
+		utils/colors.c \
+		ping/context.c \
 		ping/packet.c \
 		ping/ping.c \
-		logs/logs.c \
-		ping/context.c \
 		ping/stats.c \
 		ping/signals.c \
-		colors/colors.c
+		ping/time.c \
+		ping/reponse/capture.c \
+		ping/reponse/logs.c
 
 
 OBJ = $(addprefix $(OBJ_DIR)/, $(SRC:.c=.o))

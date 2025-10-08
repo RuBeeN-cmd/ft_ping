@@ -24,6 +24,7 @@
 		"time.h": "c",
 		"logs.h": "c",
 		"inet.h": "c",
-		"color.h": "c"
+		"color.h": "c",
+		"libft.h": "c"
 	}
 }

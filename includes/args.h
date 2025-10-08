@@ -17,18 +17,22 @@ typedef struct	s_opt
 #define COUNT_OPT		0
 #define TTL_OPT			1
 #define VERBOSE_OPT 	2
-#define LOG_OPT 		3
-#define NO_COLOR_OPT	4
-#define NO_PREFIX_OPT	5
-#define HELP_OPT		6
-#define USAGE_OPT		7
-#define VERSION_OPT 	8
-#define OPTS_NB			9
+#define TIMEOUT_OPT 	3
+#define LINGER_OPT 		4
+#define LOG_OPT 		5
+#define NO_COLOR_OPT	6
+#define NO_PREFIX_OPT	7
+#define HELP_OPT		8
+#define USAGE_OPT		9
+#define VERSION_OPT 	10
+#define OPTS_NB			11
 
 #define	OPTS { \
 	((t_opt) {'c', "count", "stop after sending NUMBER packets", "NUMBER", 0}), \
 	((t_opt) {0, "ttl", "specify N as time-to-live", "N", 0}), \
 	((t_opt) {'v', "verbose", "verbose output", NULL, 0}), \
+	((t_opt) {'w', "timeout", "stop after N seconds", "N", 0}), \
+	((t_opt) {'W', "linger", "number of seconds to wait for response", "N", 0}), \
 	((t_opt) {0, "log", "define the log level", "LEVEL", 0}), \
 	((t_opt) {0, "no-color", "disable ANSI colors", NULL, 0}), \
 	((t_opt) {0, "no-prefix", "disable logs prefix", NULL, 0}), \
@@ -42,6 +46,8 @@ typedef struct	s_opts
 	uint64_t	bitmap;
 	uint32_t	count;
 	uint8_t		ttl;
+	uint32_t	timeout;
+	uint32_t	linger;
 	char		**hosts;
 }				t_opts;
 

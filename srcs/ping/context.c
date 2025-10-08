@@ -17,14 +17,14 @@ static int	create_send_socket()
 	return (socket_fd);
 }
 
-static int	create_recv_socket()
+static int	create_recv_socket(uint32_t timeout)
 {
 	int	socket_fd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
 	if (socket_fd < 0) {
 		return (-1);
 	}
 	struct timeval tv;
-	tv.tv_sec = 1;
+	tv.tv_sec = timeout;
 	tv.tv_usec = 0;
 	if (setsockopt(socket_fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0) {
 		close(socket_fd);
@@ -46,7 +46,7 @@ int	init_context(t_context *c, int argc, char *argv[])
 		goto exit_3;
 	}
 
-	c->recv_socket = create_recv_socket();
+	c->recv_socket = create_recv_socket(c->opts.timeout);
 	if (c->recv_socket < 0) {
 		ERR("Failed to create receive socket\n");
 		goto exit_2;
@@ -55,6 +55,10 @@ int	init_context(t_context *c, int argc, char *argv[])
 	if (init_signals()) {
 		ERR("Failed to initialize signals\n");
 		goto exit_1;
+	}
+
+	if (gettimeofday(&c->start_time, NULL) < 0) {
+		WARN("Failed to get start time, timeout option may not work\n");
 	}
 
 	return (0);

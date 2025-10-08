@@ -10,6 +10,7 @@
 #include <args.h>
 #include <signals.h>
 #include <libft.h>
+#include <sys/time.h>
 
 typedef struct	s_stats
 {
@@ -25,9 +26,10 @@ typedef struct	s_stats
 
 typedef struct s_context
 {
-	t_opts	opts;
-	int 	send_socket;
-	int 	recv_socket;
+	t_opts			opts;
+	int 			send_socket;
+	int 			recv_socket;
+	struct timeval	start_time;
 } t_context;
 
 // context
@@ -37,7 +39,7 @@ void	close_context(t_context *c);
 
 uint8_t send_echo_request(int socket, struct sockaddr_in dest, t_ping_packet *packet);
 int		get_source_ip(struct in_addr *src_addr);
-int		capture_response(t_stats *stats, t_ping_packet *p, int socket);
+int		capture_response(t_stats *stats, t_ping_packet *p, int recv_socket, uint8_t verbose);
 
 // stats.c
 void 	init_stats(t_stats *stats);
@@ -45,5 +47,11 @@ void	add_time(t_stats *stats, double time);
 void	free_stats(t_stats *stats);
 void	calculate_metrics(t_stats *stats);
 void	show_stats(t_stats *stats, char *host);
+
+
+// reponse/logs.c
+void	print_response_info(ssize_t captured_bytes, struct in_addr from_addr, t_packet *recv_packet, double time_ms);
+void	print_packet_dump(t_packet *packet);
+void	print_ttl_exceeded_info(t_packet *packet_sent, ssize_t captured_bytes, struct in_addr from_addr, uint8_t verbose);
 
 #endif

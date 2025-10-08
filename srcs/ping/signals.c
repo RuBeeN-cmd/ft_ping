@@ -1,8 +1,4 @@
 #include <signals.h>
-#include <signal.h>
-#include <bits/sigaction.h>
-#include <stddef.h>
-#include <logs.h>
 
 void	set_early_exit(int value)
 {
