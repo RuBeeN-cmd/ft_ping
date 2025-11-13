@@ -79,7 +79,7 @@ void	help(t_opt opts[], size_t opts_nb)
 	INFO("Mandatory or optional arguments to long options are also mandatory or optional\n");
 	INFO("for any corresponding short options.\n");
 	INFO("\n");
-	INFO("Options marked with (root only) are available only to superuser.\n");
+	INFO("The whole program is available only to superuser.\n");
 }
 
 void	version()

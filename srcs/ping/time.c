@@ -14,7 +14,7 @@ struct timeval get_elapsed_time(struct timeval *start, struct timeval *end)
 
 double timeval_to_ms(struct timeval tv)
 {
-	return (tv.tv_sec * 1000) + (tv.tv_usec / 1000.0);
+	return (tv.tv_sec * 1000.0) + (tv.tv_usec / 1000.0);
 }
 
 double get_elapsed_ms(struct timeval start, struct timeval end)

@@ -30,7 +30,18 @@ typedef struct s_context
 	int 			send_socket;
 	int 			recv_socket;
 	struct timeval	start_time;
+	int				force_quit;
+	int				timed_out;
 } t_context;
+
+typedef struct s_target
+{
+	char				hostname[1024];
+	char				*arg;
+	struct sockaddr_in	addr;
+	t_ping_packet		packet;
+	t_stats				stats;
+} t_target;
 
 // context
 int		init_context(t_context *c, int argc, char *argv[]);
@@ -39,7 +50,7 @@ void	close_context(t_context *c);
 
 uint8_t send_echo_request(int socket, struct sockaddr_in dest, t_ping_packet *packet);
 int		get_source_ip(struct in_addr *src_addr);
-int		capture_response(t_stats *stats, t_ping_packet *p, int recv_socket, uint8_t verbose);
+int		capture_response(t_target *target, int recv_socket, uint8_t verbose);
 
 // stats.c
 void 	init_stats(t_stats *stats);
@@ -48,10 +59,12 @@ void	free_stats(t_stats *stats);
 void	calculate_metrics(t_stats *stats);
 void	show_stats(t_stats *stats, char *host);
 
-
 // reponse/logs.c
-void	print_response_info(ssize_t captured_bytes, struct in_addr from_addr, t_packet *recv_packet, double time_ms);
+void	print_response_info(ssize_t captured_bytes, struct in_addr from_addr, char *hostname, t_packet *recv_packet, double time_ms);
 void	print_packet_dump(t_packet *packet);
 void	print_ttl_exceeded_info(t_packet *packet_sent, ssize_t captured_bytes, struct in_addr from_addr, uint8_t verbose);
+
+// target.c
+int		init_target(t_target *target, char *hostname, t_opts *opts);
 
 #endif

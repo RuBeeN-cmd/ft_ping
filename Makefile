@@ -19,7 +19,8 @@ SRC = main.c \
 		ping/signals.c \
 		ping/time.c \
 		ping/reponse/capture.c \
-		ping/reponse/logs.c
+		ping/reponse/logs.c \
+		ping/target.c
 
 
 OBJ = $(addprefix $(OBJ_DIR)/, $(SRC:.c=.o))

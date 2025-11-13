@@ -78,6 +78,7 @@ void	calculate_metrics(t_stats *stats)
 
 void	show_stats(t_stats *stats, char *host)
 {
+	calculate_metrics(stats);
 	INFO("--- %s%s%s ping statistics ---\n", get_color(COLOR_PURPLE), host, get_color(COLOR_RESET));
 	double	percent_loss = stats->sent ? ((stats->sent - stats->received) * 100.0 / stats->sent) : 0;
 	char	*percent_loss_color = percent_loss == 0 ? get_color(COLOR_GREEN) : (percent_loss < 100 ? get_color(COLOR_ORANGE) : get_color(COLOR_RED));

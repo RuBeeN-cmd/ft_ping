@@ -14,6 +14,10 @@ static int	create_send_socket()
 		close(socket_fd);
 		return (-1);
 	}
+	if (setsockopt(socket_fd, SOL_SOCKET, SO_BROADCAST, &enable, sizeof(enable)) < 0) {
+		close(socket_fd);
+		return (-1);
+	}
 	return (socket_fd);
 }
 
@@ -35,6 +39,8 @@ static int	create_recv_socket(uint32_t timeout)
 		
 int	init_context(t_context *c, int argc, char *argv[])
 {
+	c->force_quit = 0;
+	c->timed_out = 0;
 	int ret = parse_args(argc, argv, &c->opts);
 	if (ret) {
 		return (ret);
@@ -46,7 +52,7 @@ int	init_context(t_context *c, int argc, char *argv[])
 		goto exit_3;
 	}
 
-	c->recv_socket = create_recv_socket(c->opts.timeout);
+	c->recv_socket = create_recv_socket(c->opts.linger);
 	if (c->recv_socket < 0) {
 		ERR("Failed to create receive socket\n");
 		goto exit_2;

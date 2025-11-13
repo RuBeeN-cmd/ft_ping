@@ -1,13 +1,24 @@
 #include <ft_ping.h>
 
-void	print_response_info(ssize_t captured_bytes, struct in_addr from_addr, t_packet *recv_packet, double time_ms) {
-	INFO("%s%zd%s bytes from %s%s%s: icmp_seq=%s%d%s ttl=%s%d%s time=%s%.3f ms%s\n",
-		get_color(COLOR_BLUE), captured_bytes - sizeof(struct iphdr), get_color(COLOR_RESET),
-		get_color(COLOR_PURPLE), inet_ntoa(from_addr), get_color(COLOR_RESET),
-		get_color(COLOR_BLUE), ntohs(recv_packet->icmp_header.un.echo.sequence), get_color(COLOR_RESET),
-		get_color(COLOR_YELLOW), recv_packet->ip_header.ttl, get_color(COLOR_RESET),
-		get_color(COLOR_CYAN), time_ms,
-		get_color(COLOR_RESET));
+void	print_response_info(ssize_t captured_bytes, struct in_addr from_addr, char *hostname, t_packet *recv_packet, double time_ms) {
+	if (hostname[0]) {
+		INFO("%s%zd%s bytes from %s%s%s (%s%s%s): icmp_seq=%s%d%s ttl=%s%d%s time=%s%.3f ms%s\n",
+			get_color(COLOR_BLUE), captured_bytes - sizeof(struct iphdr), get_color(COLOR_RESET),
+			get_color(COLOR_RED), hostname, get_color(COLOR_RESET),
+			get_color(COLOR_PURPLE), inet_ntoa(from_addr), get_color(COLOR_RESET),
+			get_color(COLOR_BLUE), ntohs(recv_packet->icmp_header.un.echo.sequence), get_color(COLOR_RESET),
+			get_color(COLOR_YELLOW), recv_packet->ip_header.ttl, get_color(COLOR_RESET),
+			get_color(COLOR_CYAN), time_ms,
+			get_color(COLOR_RESET));
+	} else {
+		INFO("%s%zd%s bytes from %s%s%s: icmp_seq=%s%d%s ttl=%s%d%s time=%s%.3f ms%s\n",
+			get_color(COLOR_BLUE), captured_bytes - sizeof(struct iphdr), get_color(COLOR_RESET),
+			get_color(COLOR_PURPLE), inet_ntoa(from_addr), get_color(COLOR_RESET),
+			get_color(COLOR_BLUE), ntohs(recv_packet->icmp_header.un.echo.sequence), get_color(COLOR_RESET),
+			get_color(COLOR_YELLOW), recv_packet->ip_header.ttl, get_color(COLOR_RESET),
+			get_color(COLOR_CYAN), time_ms,
+			get_color(COLOR_RESET));
+	}
 }
 
 void	print_packet_dump(t_packet *packet) {

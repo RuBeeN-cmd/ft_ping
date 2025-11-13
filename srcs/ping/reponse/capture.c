@@ -30,7 +30,7 @@ int	check_response(ssize_t captured_bytes, char *buffer, uint16_t expected_id, u
 	return (1);
 }
 
-int	capture_response(t_stats *stats, t_ping_packet *p, int recv_socket, uint8_t verbose)
+int	capture_response(t_target *target, int recv_socket, uint8_t verbose)
 {
 	struct sockaddr_in from_addr = {};
 	socklen_t addr_size = sizeof(from_addr);
@@ -40,21 +40,21 @@ int	capture_response(t_stats *stats, t_ping_packet *p, int recv_socket, uint8_t 
 									  (struct sockaddr *) &from_addr, &addr_size);
 	if (captured_bytes == -1)
 		return (1);
-
+	DBG("Captured %zd bytes from %s\n", captured_bytes, inet_ntoa(from_addr.sin_addr));
 	struct timeval recv_time;
 	gettimeofday(&recv_time, NULL);
 
-	if (!check_response(captured_bytes, buffer, p->packet.icmp_header.un.echo.id, p->packet.icmp_header.un.echo.sequence)) {
-		return (capture_response(stats, p, recv_socket, verbose));
+	if (!check_response(captured_bytes, buffer, target->packet.packet.icmp_header.un.echo.id, target->packet.packet.icmp_header.un.echo.sequence)) {
+		return (capture_response(target, recv_socket, verbose));
 	}
 
 	t_packet *recv_packet = (t_packet *)(buffer);
 	if (recv_packet->icmp_header.type == ICMP_TIME_EXCEEDED) {
-		print_ttl_exceeded_info(&p->packet, captured_bytes, from_addr.sin_addr, verbose);
+		print_ttl_exceeded_info(&target->packet.packet, captured_bytes, from_addr.sin_addr, verbose);
 	} else {
-		double time_ms = get_elapsed_ms(p->send_timestamp, recv_time);
-		add_time(stats, time_ms);
-		print_response_info(captured_bytes, from_addr.sin_addr, recv_packet, time_ms);
+		double time_ms = get_elapsed_ms(target->packet.send_timestamp, recv_time);
+		add_time(&target->stats, time_ms);
+		print_response_info(captured_bytes, from_addr.sin_addr, target->hostname, recv_packet, time_ms);
 	}
 	return (0);
 }
