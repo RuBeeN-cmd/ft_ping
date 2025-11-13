@@ -50,7 +50,7 @@ void	close_context(t_context *c);
 
 uint8_t send_echo_request(int socket, struct sockaddr_in dest, t_ping_packet *packet);
 int		get_source_ip(struct in_addr *src_addr);
-int		capture_response(t_target *target, int recv_socket, uint8_t verbose);
+int		capture_response(t_target *target, int recv_socket, t_opts *opts);
 
 // stats.c
 void 	init_stats(t_stats *stats);

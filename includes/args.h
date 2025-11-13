@@ -20,13 +20,14 @@ typedef struct	s_opt
 #define VERBOSE_OPT 	3
 #define TIMEOUT_OPT 	4
 #define LINGER_OPT 		5
-#define LOG_OPT 		6
-#define NO_COLOR_OPT	7
-#define NO_PREFIX_OPT	8
-#define HELP_OPT		9
-#define USAGE_OPT		10
-#define VERSION_OPT 	11
-#define OPTS_NB			12
+#define FLOOD_OPT 		6
+#define LOG_OPT 		7
+#define NO_COLOR_OPT	8
+#define NO_PREFIX_OPT	9
+#define HELP_OPT		10
+#define USAGE_OPT		11
+#define VERSION_OPT 	12
+#define OPTS_NB			13
 
 #define	OPTS { \
 	((t_opt) {'c', "count", "stop after sending NUMBER packets", "NUMBER", 0}), \
@@ -35,6 +36,7 @@ typedef struct	s_opt
 	((t_opt) {'v', "verbose", "verbose output", NULL, 0}), \
 	((t_opt) {'w', "timeout", "stop after N seconds", "N", 0}), \
 	((t_opt) {'W', "linger", "number of seconds to wait for response", "N", 0}), \
+	((t_opt) {'f', "flood", "flood ping", NULL, 0}), \
 	((t_opt) {0, "log", "define the log level", "LEVEL", 0}), \
 	((t_opt) {0, "no-color", "disable ANSI colors", NULL, 0}), \
 	((t_opt) {0, "no-prefix", "disable logs prefix", NULL, 0}), \

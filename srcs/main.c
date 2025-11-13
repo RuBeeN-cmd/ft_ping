@@ -66,9 +66,10 @@ int main(int argc, char *argv[]) {
 
 
 			DBG("Waiting for response...\n");
-			capture_response(&target, c.recv_socket, has_flag(c.opts.bitmap, VERBOSE_OPT));
+			capture_response(&target, c.recv_socket, &c.opts);
 			update_packet(&target.packet);
-			sleep(1);
+			if (!has_flag(c.opts.bitmap, FLOOD_OPT))
+				sleep(1);
 
 			if (c.timed_out)
 				break;
