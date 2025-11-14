@@ -36,7 +36,7 @@ int	init_target(t_target *target, char *hostname, t_opts *opts) {
 			target->hostname, sizeof(target->hostname), NULL, 0, 0);
 	}
 
-	if (create_ping_packet(target->addr, &target->packet, opts->ttl)) {
+	if (create_ping_packet(target->addr, &target->packet, opts->ttl, opts->tos)) {
 		WARN("Failed to create packet for: %s\n", hostname);
 		return (1);
 	}

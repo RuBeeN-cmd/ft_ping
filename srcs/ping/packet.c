@@ -50,11 +50,11 @@ uint16_t	 calculate_checksum(void *buffer, size_t length)
 	return (htons(~sum));
 }
 
-int	init_ip_header(struct iphdr *ip_header, size_t packet_size, in_addr_t dest_addr, uint8_t ttl)
+int	init_ip_header(struct iphdr *ip_header, size_t packet_size, in_addr_t dest_addr, uint8_t ttl, uint8_t tos)
 {
 	ip_header->ihl = sizeof(struct iphdr) / 4; 
 	ip_header->version = 4;
-	ip_header->tos = IPTOS_CLASS_DEFAULT;
+	ip_header->tos = tos;
 	ip_header->tot_len = htons(packet_size);
 	ip_header->id = htons(getpid());
 	ip_header->frag_off = htons(0x4000);
@@ -90,7 +90,6 @@ void	init_icmp_data(char *data)
 	struct timeval tv;
 	if (gettimeofday(&tv, NULL) == -1)
 	{
-		// TODO
 		return ;
 	}
 	ft_memcpy(data, &tv.tv_sec, sizeof(tv.tv_sec));
@@ -100,11 +99,11 @@ void	init_icmp_data(char *data)
 	}
 }
 
-int	create_packet(struct sockaddr_in dest_addr, t_packet *packet, uint8_t ttl)
+int	create_packet(struct sockaddr_in dest_addr, t_packet *packet, uint8_t ttl, uint8_t tos)
 {
 
 	if (init_ip_header(&packet->ip_header, sizeof(packet->ip_header)
- 		+ sizeof(packet->icmp_header) + PING_PACKET_DATA_SIZE, dest_addr.sin_addr.s_addr, ttl))
+ 		+ sizeof(packet->icmp_header) + PING_PACKET_DATA_SIZE, dest_addr.sin_addr.s_addr, ttl, tos))
 	{
 		return (1);
 	}
@@ -114,9 +113,9 @@ int	create_packet(struct sockaddr_in dest_addr, t_packet *packet, uint8_t ttl)
 	return (0);
 }
 
-int	create_ping_packet(struct sockaddr_in dest_addr, t_ping_packet *p, uint8_t ttl)
+int	create_ping_packet(struct sockaddr_in dest_addr, t_ping_packet *p, uint8_t ttl, uint8_t tos)
 {
-	if (create_packet(dest_addr, &p->packet, ttl))
+	if (create_packet(dest_addr, &p->packet, ttl, tos))
 		return (1);
 	ft_bzero(&p->send_timestamp, sizeof(p->send_timestamp));
 	return (0);
