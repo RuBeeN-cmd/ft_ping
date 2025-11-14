@@ -56,14 +56,12 @@ int main(int argc, char *argv[]) {
 			}
 			target.stats.sent++;
 
-
 			if (!c.timed_out && has_flag(c.opts.bitmap, TIMEOUT_OPT) && is_timed_out(c.opts.timeout, c.start_time)) {
 				c.timed_out = 1;
 				break;
 			}
 			if (c.force_quit)
 				break;
-
 
 			DBG("Waiting for response...\n");
 			capture_response(&target, c.recv_socket, &c.opts);

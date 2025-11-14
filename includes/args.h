@@ -14,26 +14,28 @@ typedef struct	s_opt
 	int				can_interrupt;
 }				t_opt;
 
-#define COUNT_OPT		0
-#define NUMERIC_OPT		1
-#define TTL_OPT			2
-#define VERBOSE_OPT 	3
-#define TOS_OPT			4
-#define TIMEOUT_OPT 	5
-#define LINGER_OPT 		6
-#define FLOOD_OPT 		7
-#define PRELOAD_OPT 	8
-#define LOG_OPT 		9
-#define NO_COLOR_OPT	10
-#define NO_PREFIX_OPT	11
-#define HELP_OPT		12
-#define USAGE_OPT		13
-#define VERSION_OPT 	14
-#define OPTS_NB			15
+#define COUNT_OPT			0
+#define NUMERIC_OPT			1
+#define IGNORE_ROUTING_OPT	2
+#define TTL_OPT				3
+#define VERBOSE_OPT 		4
+#define TOS_OPT				5
+#define TIMEOUT_OPT 		6
+#define LINGER_OPT 			7
+#define FLOOD_OPT 			8
+#define PRELOAD_OPT 		9
+#define LOG_OPT 			10
+#define NO_COLOR_OPT		11
+#define NO_PREFIX_OPT		12
+#define HELP_OPT			13
+#define USAGE_OPT			14
+#define VERSION_OPT 		15
+#define OPTS_NB				16
 
 #define	OPTS { \
 	((t_opt) {'c', "count", "stop after sending NUMBER packets", "NUMBER", 0}), \
 	((t_opt) {'n', "numeric", "do not resolve host addresses", NULL, 0}), \
+	((t_opt) {'r', "ignore-routing", "send directly to a host on an attached network", NULL, 0}), \
 	((t_opt) {0, "ttl", "specify N as time-to-live", "N", 0}), \
 	((t_opt) {'v', "verbose", "verbose output", NULL, 0}), \
 	((t_opt) {'T', "tos", "set type of service (TOS) to NUM", "NUM", 0}), \

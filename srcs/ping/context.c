@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <sys/time.h>
 
-static int	create_send_socket()
+static int	create_send_socket(int ignore_routing)
 {
 	int	socket_fd = socket(AF_INET, SOCK_RAW, IPPROTO_RAW);
 	if (socket_fd < 0) {
@@ -17,6 +17,12 @@ static int	create_send_socket()
 	if (setsockopt(socket_fd, SOL_SOCKET, SO_BROADCAST, &enable, sizeof(enable)) < 0) {
 		close(socket_fd);
 		return (-1);
+	}
+	if (ignore_routing) {
+		if (setsockopt(socket_fd, SOL_SOCKET, SO_DONTROUTE, &enable, sizeof(enable)) < 0) {
+			close(socket_fd);
+			return (-1);
+		}
 	}
 	return (socket_fd);
 }
@@ -46,7 +52,7 @@ int	init_context(t_context *c, int argc, char *argv[])
 		return (ret);
 	}
 
-	c->send_socket = create_send_socket();
+	c->send_socket = create_send_socket(has_flag(c->opts.bitmap, IGNORE_ROUTING_OPT));
 	if (c->send_socket < 0) {
 		ERR("Failed to create send socket\n");
 		goto exit_3;
